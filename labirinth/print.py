@@ -11,6 +11,7 @@ def printout(x):
     for i in x:
         print("".join(i))
 #asdasdegwegwegweg13515215
+#21312321321qweqwe
 map = blank_map(WIDTH, LENGTH)
 map[3][10] = "X"
 printout(map)
