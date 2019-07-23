@@ -2,6 +2,9 @@ import sys
 filename = "blank_map.txt" #your file name...
 LENGTH = 16
 WIDTH = 80
+P = "X" # player mark
+Px = 10 # + 1 the reall cordinate
+Py = 3 # + 1 the reall cordinate
 def readfile(x): #("") reads your x file
     with open(x) as f:
         y = f.read().splitlines()
@@ -26,6 +29,5 @@ for i in MAP:
 
 #map = blank_map(WIDTH, LENGTH)
 #map[3][10] = "X"
-MAP[10][10] = "X"
-print(MAP)
+MAP[Py][Px] = P
 printout(MAP)
