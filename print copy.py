@@ -1,14 +1,18 @@
 import time
 import math
+import sys
+
+
 P = "X"  # player mark
-E = "O"  # endpoint mark
+E = "Z"  # endpoint mark
 Px = 9  # + 1 the reall cordinate
 Py = 2  # + 1 the reall cordinate
 Ex = 14  # + 1 the reall cordinate
 Ey = 5  # + 1 the reall cordinate
-EDGE = 1 # map edge length
-#LENGTH, WIDTH = 16, 80
-def readfile(x): #("") reads your x file
+EDGE = 1  # map edge length
+
+
+def readfile(x):  # ("") reads your x file
     with open(x) as f:
         y = f.read().splitlines()
         z = []
@@ -24,46 +28,54 @@ def blank_map(x, y):
 def printout(x):
     for i in x:
         print("".join(i))
-def PLAYER():
-    MAP[Py][Px] = P
-def END():
-    MAP[Ey][Ex] = E
+def MAINPRINT(x, y):
+    global spaceing
+    if len(y) > len(x):
+        print("-" * len(x[0]))
+        for i in range(spaceing):
+            print()
+        printout(x)
+        for i in range(spaceing):
+            print()
+        print("-" * len(x[0]))
+    else:
+        printout(x)
 def MOVE(x):
     direction = ""
     global Py, Px, EDGE
     x[Py][Px] = "."
-    while direction not in ("w", "a", "s", "d"):
+    while direction not in ("w", "a", "s", "d", "quit"):
         direction = input("Give me WASD:")
-        if direction == "quit":
-            break
         continue
-    if direction == "w" and Py - 1 - EDGE >= 0:
-        Py -= 1      
+    if direction == "quit":
+        sys.exit()
+    elif direction == "w" and Py - 1 - EDGE >= 0:
+        Py -= 1
     elif direction == "s" and len(x) > Py + 1 + EDGE:
         Py += 1
     elif direction == "a" and Px - 1 - EDGE >= 0:
         Px -= 1
     elif direction == "d" and len(x[0]) > Px + 1 + EDGE:
         Px += 1
-    else:
+    elif direction in ("w", "a", "s", "d"):
         printout(suprise)
         time.sleep(2)
-
-
+    x[Ey][Ex] = E
+    x[Py][Px] = P
+def CHECKWIN(x):
+    if Py == Ey and Px == Ex:
+        printout(x)
+        sys.exit()
 
 MAP = readfile("blank_map_edge.txt")  # calls readfile() to load your file content into a list
 suprise = readfile("suprise.txt")
+win = readfile("win.txt")
+spaceing = math.ceil(((len(suprise) - len(MAP) + 1) / 2))
+MAP[Py][Px] = P
+MAP[Ey][Ex] = E
+
+
 while True:
-    PLAYER()
-    END()
-    if len(suprise) > len(MAP):
-        print("-" * len(MAP[0]))
-        for i in range(math.ceil(((len(suprise) - len(MAP)  + 1) / 2))):
-            print()
-        printout(MAP)
-        for i in range(math.ceil(((len(suprise) - len(MAP)  + 1) / 2))):
-            print()
-        print("-" * len(MAP[0]))
-    else:
-        printout(MAP)
+    MAINPRINT(MAP, suprise)
+    CHECKWIN(win)
     MOVE(MAP)
