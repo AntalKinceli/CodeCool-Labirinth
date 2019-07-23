@@ -10,7 +10,7 @@ def blank_map(x, y):
 def printout(x):
     for i in x:
         print("".join(i))
-#asdasd
+#asdasdegwegwegweg
 map = blank_map(WIDTH, LENGTH)
 map[3][10] = "X"
 printout(map)
