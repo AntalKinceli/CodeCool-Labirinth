@@ -1,7 +1,7 @@
 LENGTH = 16
 WIDTH = 80
 
-s
+
 def blank_map(x, y):
     z = []
     for i in range(y):
