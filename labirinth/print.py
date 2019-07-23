@@ -10,9 +10,8 @@ def blank_map(x, y):
 def printout(x):
     for i in x:
         print("".join(i))
-#21312312312
-#windows
-asdasdsa
+
+
 map = blank_map(WIDTH, LENGTH)
 map[3][10] = "X"
 printout(map)
