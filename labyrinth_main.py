@@ -1,7 +1,7 @@
 import time
 import math
 import sys
-
+import os
 
 P = "X"  # player mark
 E = "O"  # endpoint mark
@@ -28,6 +28,10 @@ def readfile(x):  # ("") reads your x file
 #     for i in range(y):
 #         z.append(["0"] * x)
 #     return z
+
+
+def cls():
+    os.system('cls' if os.name=='nt' else 'clear')
 
 
 def printout(x):
@@ -74,6 +78,7 @@ def move(x):
 
 def checkwin(x):
     if py == endy and px == endx:
+        cls()
         printout(x)
         sys.exit()
 
