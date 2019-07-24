@@ -5,10 +5,10 @@ import sys
 
 P = "X"  # player mark
 E = "O"  # endpoint mark
-Px = 9  # + 1 the reall cordinate
-Py = 2  # + 1 the reall cordinate
-Ex = 14  # + 1 the reall cordinate
-Ey = 5  # + 1 the reall cordinate
+px = 9  # + 1 the reall cordinate
+py = 2  # + 1 the reall cordinate
+endx = 14  # + 1 the reall cordinate
+endy = 5  # + 1 the reall cordinate
 EDGE = 1  # map edge length
 WALL = ["|", "-"]
 
@@ -18,16 +18,16 @@ def readfile(x):  # ("") reads your x file
         y = f.read().splitlines()
         z = []
         f.close
-        for i in y:
+        for i in y:  # makes list array from string
             z.append(list(i))
         return z
 
 
-def blank_map(x, y):
-    z = []
-    for i in range(y):
-        z.append(["0"] * x)
-    return z
+# def blank_map(x, y):      not used any more
+#     z = []
+#     for i in range(y):
+#         z.append(["0"] * x)
+#     return z
 
 
 def printout(x):
@@ -35,7 +35,7 @@ def printout(x):
         print("".join(i))
 
 
-def MAINPRINT(x, y):
+def main_print(x, y):
     global spaceing
     if len(y) > len(x):
         print("-" * len(x[0]))
@@ -49,46 +49,46 @@ def MAINPRINT(x, y):
         printout(x)
 
 
-def MOVE(x):
+def move(x):
     direction = ""
-    global Py, Px, EDGE
-    x[Py][Px] = "."
+    global py, px, EDGE
+    x[py][px] = "."
     while direction not in ("w", "a", "s", "d", "quit"):
         direction = input("Give me WASD:")
         continue
     if direction == "quit":
         sys.exit()
-    elif direction == "w" and Py - 1 - EDGE >= 0 and x[Py - 1][Px] not in WALL:
-        Py -= 1
-    elif direction == "s" and len(x) > Py + 1 + EDGE and x[Py + 1][Px] not in WALL:
-        Py += 1
-    elif direction == "a" and Px - 1 - EDGE >= 0 and x[Py][Px - 1] not in WALL:
-        Px -= 1
-    elif direction == "d" and len(x[0]) > Px + 1 + EDGE and x[Py][Px + 1] not in WALL:
-        Px += 1
+    elif direction == "w" and py - 1 - EDGE >= 0 and x[py - 1][px] not in WALL:
+        py -= 1
+    elif direction == "s" and len(x) > py + 1 + EDGE and x[py + 1][px] not in WALL:
+        py += 1
+    elif direction == "a" and px - 1 - EDGE >= 0 and x[py][px - 1] not in WALL:
+        px -= 1
+    elif direction == "d" and len(x[0]) > px + 1 + EDGE and x[py][px + 1] not in WALL:
+        px += 1
     elif direction in ("w", "a", "s", "d"):
         printout(suprise)
         time.sleep(2)
-    x[Ey][Ex] = E
-    x[Py][Px] = P
+    x[endy][endx] = E
+    x[py][px] = P
 
 
-def CHECKWIN(x):
-    if Py == Ey and Px == Ex:
+def checkwin(x):
+    if py == endy and px == endx:
         printout(x)
         sys.exit()
 
 
 # calls readfile() to load your file content into a list
-MAP = readfile("first_map.txt")
+labyrinth_map = readfile("first_map.txt")
 suprise = readfile("suprise.txt")
 win = readfile("win.txt")
-spaceing = math.ceil(((len(suprise) - len(MAP) + 1) / 2))
-MAP[Py][Px] = P
-MAP[Ey][Ex] = E
+spaceing = math.ceil(((len(suprise) - len(labyrinth_map) + 1) / 2))
+labyrinth_map[py][px] = P
+labyrinth_map[endy][endx] = E
 
 
 while True:
-    MAINPRINT(MAP, suprise)
-    CHECKWIN(win)
-    MOVE(MAP)
+    main_print(labyrinth_map, suprise)
+    checkwin(win)
+    move(labyrinth_map)
