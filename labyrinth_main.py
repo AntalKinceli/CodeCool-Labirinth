@@ -66,7 +66,7 @@ def move(x):
         px -= 1
     elif direction == "d" and len(x[0]) > px + 1 + EDGE and x[py][px + 1] not in WALL:
         px += 1
-    elif direction in ("w", "a", "s", "d"):
+    else:
         printout(surprise)
         time.sleep(2)
     x[endy][endx] = E
