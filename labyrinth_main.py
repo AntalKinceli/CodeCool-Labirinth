@@ -23,15 +23,15 @@ def readfile(x):  # ("") reads your x file
         return z
 
 
-# def blank_map(x, y):      not used any more
-#     z = []
-#     for i in range(y):
-#         z.append(["0"] * x)
-#     return z
+def blank_map(x, y):  # not used any more
+    z = []
+    for i in range(y):
+        z.append(["0"] * x)
+    return z
 
 
 def cls():
-    os.system('cls' if os.name=='nt' else 'clear')
+    os.system('cls' if os.name == 'nt' else 'clear')
 
 
 def printout(x):
