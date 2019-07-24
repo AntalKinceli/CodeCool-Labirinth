@@ -69,7 +69,6 @@ def move(x):
     else:
         printout(surprise)
         time.sleep(2)
-    x[endy][endx] = E
     x[py][px] = P
 
 
