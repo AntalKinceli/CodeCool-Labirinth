@@ -12,6 +12,7 @@ Ey = 5  # + 1 the reall cordinate
 EDGE = 1  # map edge length
 WALL = ["|", "-"]
 
+
 def readfile(x):  # ("") reads your x file
     with open(x) as f:
         y = f.read().splitlines()
@@ -20,14 +21,20 @@ def readfile(x):  # ("") reads your x file
         for i in y:
             z.append(list(i))
         return z
+
+
 def blank_map(x, y):
     z = []
     for i in range(y):
         z.append(["0"] * x)
     return z
+
+
 def printout(x):
     for i in x:
         print("".join(i))
+
+
 def MAINPRINT(x, y):
     global spaceing
     if len(y) > len(x):
@@ -40,6 +47,8 @@ def MAINPRINT(x, y):
         print("-" * len(x[0]))
     else:
         printout(x)
+
+
 def MOVE(x):
     direction = ""
     global Py, Px, EDGE
@@ -49,7 +58,7 @@ def MOVE(x):
         continue
     if direction == "quit":
         sys.exit()
-    elif direction == "w" and Py - 1 - EDGE >= 0 and x[Py- 1][Px]  not in WALL:
+    elif direction == "w" and Py - 1 - EDGE >= 0 and x[Py - 1][Px] not in WALL:
         Py -= 1
     elif direction == "s" and len(x) > Py + 1 + EDGE and x[Py + 1][Px] not in WALL:
         Py += 1
@@ -62,12 +71,16 @@ def MOVE(x):
         time.sleep(2)
     x[Ey][Ex] = E
     x[Py][Px] = P
+
+
 def CHECKWIN(x):
     if Py == Ey and Px == Ex:
         printout(x)
         sys.exit()
 
-MAP = readfile("first_map.txt")  # calls readfile() to load your file content into a list
+
+# calls readfile() to load your file content into a list
+MAP = readfile("first_map.txt")
 suprise = readfile("suprise.txt")
 win = readfile("win.txt")
 spaceing = math.ceil(((len(suprise) - len(MAP) + 1) / 2))

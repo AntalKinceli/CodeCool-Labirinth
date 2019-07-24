@@ -7,6 +7,8 @@ def blank_map(x, y):
     for i in range(y):
         z.append(["0"] * x)
     return z
+
+
 def printout(x):
     for i in x:
         print("".join(i))
