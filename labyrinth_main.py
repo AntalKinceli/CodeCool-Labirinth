@@ -6,9 +6,9 @@ import os
 P = "X"  # player mark
 E = "O"  # endpoint mark
 F = "Z"  # fog mark
-px = 9  # + 1 the reall cordinate
-py = 2  # + 1 the reall cordinate
-endx = 14  # + 1 the reall cordinate
+px = 1  # + 1 the reall cordinate
+py = 1  # + 1 the reall cordinate
+endx = 8  # + 1 the reall cordinate
 endy = 5  # + 1 the reall cordinate
 EDGE = 1  # map edge length
 WALL = ["|", "-"]  # wall marks
@@ -83,10 +83,13 @@ def checkwin(x):
         sys.exit()
 
 
-labyrinth_map = readfile("first_map.txt")  # to load your file content into a list
+# labyrinth_map = readfile("first_map.txt")  # to load your file content into a list
+# load tutorial to a list / aternate w/ previous line
+labyrinth_map = readfile("tutorial_map.txt")
 surprise = readfile("surprise.txt")  # to load your file content into a list
 win = readfile("win.txt")  # to load your file content into a list
-mapfog = blank_map(len(labyrinth_map[0]), len(labyrinth_map), F)  # creating fog map with the same size as labyrinth
+# creating fog map with the same size as labyrinth
+mapfog = blank_map(len(labyrinth_map[0]), len(labyrinth_map), F)
 spaceing = math.ceil(((len(surprise) - len(labyrinth_map) + 1) / 2))
 
 labyrinth_map[py][px] = P
