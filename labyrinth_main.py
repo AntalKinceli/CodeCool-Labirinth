@@ -51,7 +51,7 @@ def main_print(x, y):
 
 def move(x):
     direction = ""
-    global py, px, EDGE
+    global py, px
     x[py][px] = "."
     while direction not in ("w", "a", "s", "d", "quit"):
         direction = input("Give me WASD:")
@@ -67,7 +67,7 @@ def move(x):
     elif direction == "d" and len(x[0]) > px + 1 + EDGE and x[py][px + 1] not in WALL:
         px += 1
     elif direction in ("w", "a", "s", "d"):
-        printout(suprise)
+        printout(surprise)
         time.sleep(2)
     x[endy][endx] = E
     x[py][px] = P
@@ -81,14 +81,14 @@ def checkwin(x):
 
 # calls readfile() to load your file content into a list
 labyrinth_map = readfile("first_map.txt")
-suprise = readfile("suprise.txt")
+surprise = readfile("surprise.txt")
 win = readfile("win.txt")
-spaceing = math.ceil(((len(suprise) - len(labyrinth_map) + 1) / 2))
+spaceing = math.ceil(((len(surprise) - len(labyrinth_map) + 1) / 2))
 labyrinth_map[py][px] = P
 labyrinth_map[endy][endx] = E
 
 
 while True:
-    main_print(labyrinth_map, suprise)
+    main_print(labyrinth_map, surprise)
     checkwin(win)
     move(labyrinth_map)
