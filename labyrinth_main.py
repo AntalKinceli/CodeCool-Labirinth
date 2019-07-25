@@ -56,6 +56,7 @@ def printout(x):
 
 
 def main_print(x, y):
+    cls()
     if len(y) > len(x):
         print("-" * len(x[0]))
         for i in range(spaceing):
@@ -84,6 +85,7 @@ def move(x, y, z, f):
     elif direction == "d" and len(x[0]) > f + 1 + EDGE and x[z][f + 1] not in WALL:
         f += 1
     else:
+        cls()
         printout(surprise)
         time.sleep(1.5)
     return z, f
@@ -98,7 +100,7 @@ def checkwin(x):
 
 # labyrinth_map = readfile("first_map.txt")  # to load your file content into a list
 # load tutorial to a list / aternate w/ previous line
-labyrinth_map = readfile("tutorial_map.txt")
+labyrinth_map = readfile("first_map.txt")
 surprise = readfile("surprise.txt")  # to load your file content into a list
 win = readfile("win.txt")  # to load your file content into a list
 # creating fog map with the same size as labyrinth
