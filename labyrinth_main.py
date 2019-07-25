@@ -2,6 +2,8 @@ import time
 import math
 import sys
 import os
+import tty
+import termios
 
 P = "X"  # player mark
 E = "O"  # endpoint mark
@@ -14,6 +16,17 @@ EDGE = 1  # map edge length
 WALL = ["|", "-"]  # wall marks
 TRAIL = "."  # player trail mark
 REVEAL = 1  # player reveal zone range
+
+
+def getch():
+    fd = sys.stdin.fileno()
+    old_settings = termios.tcgetattr(fd)
+    try:
+        tty.setraw(sys.stdin.fileno())
+        ch = sys.stdin.read(1)
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+    return ch
 
 
 def readfile(x):  # ("") reads your x file
@@ -58,7 +71,7 @@ def main_print(x, y):
 def move(x, y, z, f):
     direction = ""
     while direction not in ("w", "a", "s", "d", "quit"):
-        direction = input("Give me WASD:")
+        direction = getch()
         continue
     if direction == "quit":
         sys.exit()
