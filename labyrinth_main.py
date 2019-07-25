@@ -36,11 +36,11 @@ def readfile(x):  # ("") reads your x file
         h = []
         f.close
         for i in y:  # makes list array from string
-            if i[:1] != "#":
+            if i[:1] != "ß":
                 z.append(list(i))
             else:
                 j = i.lstrip(i[0])
-                j = j[0:j.rfind("#")]
+                j = j[0:j.rfind("ß")]
                 if j[:1] == "[":
                     j = j.strip("[]")
                     j = j.split(",")
