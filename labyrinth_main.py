@@ -71,7 +71,7 @@ def main_print(x, y):
 
 def move(x, y, z, f):
     direction = ""
-    while direction not in ("w", "a", "s", "d", "q"):
+    while direction not in ("w", "a", "s", "d", "q", "0", "1"):
         direction = getch()
         continue
     if direction == "q":
@@ -95,12 +95,35 @@ def checkwin(x):
     if py == endy and px == endx:
         cls()
         printout(x)
-        sys.exit()
+        time.sleep(2)
+        cls()
+        mainmenu()
 
 
 # labyrinth_map = readfile("first_map.txt")  # to load your file content into a list
 # load tutorial to a list / aternate w/ previous line
-labyrinth_map = readfile("first_map.txt")
+
+def mainmenu():
+    file = open("main_menu.txt", "r")
+    cont = file.read()
+    print(cont)
+    file.close()
+    mm = input()
+    if mm == "0":
+        labyrinth_map = readfile("tutorial_map.txt")
+    elif mm == "1":
+        labyrinth_map = readfile("first_map.txt")
+
+file = open("main_menu.txt", "r")
+cont = file.read()
+print(cont)
+file.close()
+mm = input()
+if mm == "0":
+    labyrinth_map = readfile("tutorial_map.txt")
+elif mm == "1":
+    labyrinth_map = readfile("first_map.txt")
+
 surprise = readfile("surprise.txt")  # to load your file content into a list
 win = readfile("win.txt")  # to load your file content into a list
 # creating fog map with the same size as labyrinth
@@ -125,7 +148,9 @@ for i in labyrinth_map:  # reaveals stuff around player
         for z in revealrange:
             mapfog[py + i][px + z] = labyrinth_map[py + i][px + z]
 
+
 while True:  # main loop
+    
     main_print(mapfog, surprise)
     checkwin(win)
     labyrinth_map[py][px] = TRAIL  # switches player mark to trail mark
