@@ -104,7 +104,6 @@ def checkwin(x):
 # load tutorial to a list / aternate w/ previous line
 
 def mainmenu():
-    global mapfog
     x = ""
     file = open("main_menu.txt", "r")
     cont = file.read()
@@ -118,9 +117,6 @@ def mainmenu():
     elif mm == "q":
         exit()
     return x
-    mapfog = blank_map(len(labyrinth_map[0]), len(labyrinth_map), F)
-    main_print(mapfog, surprise)
-
 
 
 
