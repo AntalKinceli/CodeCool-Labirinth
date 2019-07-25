@@ -7,4 +7,6 @@
 
         PRESS 1 FOR LEVEL 1
 
-        PRESS q FOR EXIT
+        PRESS 2 FOR LEVEL 2
+
+        PRESS Q FOR EXIT

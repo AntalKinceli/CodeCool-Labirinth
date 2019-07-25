@@ -1,0 +1,34 @@
+ßOß player (mark P =)
+ßEß endpoint (mark E =)
+ß*ß fog mark (F =)
+ß1ß + 1 the reall cordinate (px =)
+ß1ß + 1 the reall cordinate (py =)
+ß15ß + 1 the reall cordinate (endx =)
+ß21ß + 1 the reall cordinate (endy =)
+ß1ß map edge length (EDGE =)
+ß[+,|,-]ß wall marks (WALL =)
+ß ß player trail mark (TRAIL =)
+ß1ß player reveal zone range (REVEAL =)
++-+-+-+-+-+-+-+-+
+| |     |     | |
++ + +-+ + +-+ + +
+|   |   | |   | |
++-+-+ +-+-+ +-+ +
+|     |   |     |
++ +-+ + + +-+ + +
+|   | | |     | |
++-+ + + +-+-+-+ +
+|   |   |       |
++-+-+-+-+ +-+-+-+
+|         |     |
++ +-+-+-+-+ + + +
+|         | | | |
++-+-+-+-+ + + + +
+| |       | | | |
++ + +-+-+-+ +-+ +
+| |   |     |   |
++ +-+ +-+-+-+ +-+
+|   |       |   |
++-+ +-+-+ + +-+ +
+|         |     |
++-+-+-+-+-+-+-+-+

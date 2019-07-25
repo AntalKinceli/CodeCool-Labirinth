@@ -73,11 +73,12 @@ def main_print(x, y):
 
 def move(x, y, z, f):
     direction = ""
+    h = False
     while direction not in ("w", "a", "s", "d", "q"):
         direction = getch()
         continue
     if direction == "q":
-        sys.exit()
+        h = True
     elif direction == "w" and z - 1 - EDGE >= 0 and x[z - 1][f] not in WALL:
         z -= 1
     elif direction == "s" and len(x) > z + 1 + EDGE and x[z + 1][f] not in WALL:
@@ -90,7 +91,7 @@ def move(x, y, z, f):
         cls()
         printout(surprise)
         time.sleep(1.5)
-    return z, f
+    return z, f, h
 
 
 def checkwin(x):
@@ -103,16 +104,21 @@ def checkwin(x):
 
 
 def mainmenu():
+    cls()
     x = ""
+    mm = ""
     file = open("main_menu.txt", "r")
     cont = file.read()
     print(cont)
     file.close()
-    mm = getch()  # input()
+    while mm not in ["0", "1", "2", "q"]:
+        mm = getch()  # input()
     if mm == "0":
         x = "tutorial_map.txt"
     elif mm == "1":
         x = "first_map.txt"
+    elif mm == "2":
+        x = "second_map.txt"
     elif mm == "q":
         exit()
     return x
@@ -168,7 +174,9 @@ while True:
             break
         labyrinth_map[py][px] = TRAIL  # switches player mark to trail mark
         mapfog[py][px] = labyrinth_map[py][px]
-        py, px = move(labyrinth_map, mapfog, py, px)
+        py, px, level_over = move(labyrinth_map, mapfog, py, px)
+        if level_over is True:
+            break
         labyrinth_map[py][px] = P  # update player position
         mapfog[py][px] = P  # update player position
         for i in revealrange:  # reaveal stuff around player
