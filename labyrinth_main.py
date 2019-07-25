@@ -71,10 +71,10 @@ def main_print(x, y):
 
 def move(x, y, z, f):
     direction = ""
-    while direction not in ("w", "a", "s", "d", "quit"):
+    while direction not in ("w", "a", "s", "d", "q"):
         direction = getch()
         continue
-    if direction == "quit":
+    if direction == "q":
         sys.exit()
     elif direction == "w" and z - 1 - EDGE >= 0 and x[z - 1][f] not in WALL:
         z -= 1
