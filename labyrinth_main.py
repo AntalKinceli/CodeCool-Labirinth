@@ -5,17 +5,17 @@ import os
 import tty
 import termios
 
-P = "X"  # player mark
-E = "O"  # endpoint mark
-F = "Z"  # fog mark
-px = 1  # + 1 the reall cordinate
-py = 1  # + 1 the reall cordinate
-endx = 8  # + 1 the reall cordinate
-endy = 5  # + 1 the reall cordinate
-EDGE = 1  # map edge length
-WALL = ["|", "-"]  # wall marks
-TRAIL = "."  # player trail mark
-REVEAL = 1  # player reveal zone range
+# P = "X"  # player mark
+# E = "O"  # endpoint mark
+# F = "Z"  # fog mark
+# px = 1  # + 1 the reall cordinate
+# py = 1  # + 1 the reall cordinate
+# endx = 8  # + 1 the reall cordinate
+# endy = 5  # + 1 the reall cordinate
+# EDGE = 1  # map edge length
+# WALL = ["|", "-"]  # wall marks
+# TRAIL = "."  # player trail mark
+# REVEAL = 1  # player reveal zone range
 
 
 def getch():
@@ -33,10 +33,24 @@ def readfile(x):  # ("") reads your x file
     with open(x) as f:
         y = f.read().splitlines()
         z = []
+        h = []
         f.close
         for i in y:  # makes list array from string
-            z.append(list(i))
-        return z
+            if i[:1] != "#":
+                z.append(list(i))
+            else:
+                j = i.lstrip(i[0])
+                j = j[0:j.rfind("#")]
+                if j[:1] == "[":
+                    j = j.strip("[]")
+                    j = j.split(",")
+                    for l, k in enumerate(j):
+                        if k.isdigit() is True:
+                            j[l] = (int(j[l]))
+                elif j[:1].isdigit() is True:
+                    j = int(j)
+                h.append(j)
+        return z, h
 
 
 def blank_map(x, y, g):  # generates x width, y heigth list with full of g
@@ -100,9 +114,21 @@ def checkwin(x):
 
 # labyrinth_map = readfile("first_map.txt")  # to load your file content into a list
 # load tutorial to a list / aternate w/ previous line
-labyrinth_map = readfile("first_map.txt")
-surprise = readfile("surprise.txt")  # to load your file content into a list
-win = readfile("win.txt")  # to load your file content into a list
+labyrinth_map, settings = readfile("first_map.txt")
+(P,
+ E,
+ F,
+ px,
+ py,
+ endx,
+ endy,
+ EDGE,
+ WALL,
+ TRAIL,
+ REVEAL) = settings
+# to load your file content into a list
+surprise, asd = readfile("surprise.txt")
+win, dsa = readfile("win.txt")  # to load your file content into a list
 # creating fog map with the same size as labyrinth
 mapfog = blank_map(len(labyrinth_map[0]), len(labyrinth_map), F)
 spaceing = math.ceil(((len(surprise) - len(labyrinth_map) + 1) / 2))
