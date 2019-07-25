@@ -5,6 +5,7 @@ import os
 import tty
 import termios
 
+
 def getch():
     fd = sys.stdin.fileno()
     old_settings = termios.tcgetattr(fd)
@@ -107,7 +108,7 @@ def mainmenu():
     cont = file.read()
     print(cont)
     file.close()
-    mm = getch() #input()
+    mm = getch()  # input()
     if mm == "0":
         x = "tutorial_map.txt"
     elif mm == "1":
@@ -116,22 +117,25 @@ def mainmenu():
         exit()
     return x
 
+
 while True:
     labyrinth_map = mainmenu()
-    surprise, asd = readfile("surprise.txt")  # to load your file content into a list
+    # to load your file content into a list
+    surprise, asd = readfile("surprise.txt")
     win, dsa = readfile("win.txt")  # to load your file content into a list
-    labyrinth_map, settings = readfile(labyrinth_map) # to load your file content into a list
+    # to load your file content into a list
+    labyrinth_map, settings = readfile(labyrinth_map)
     (P,
-    E,
-    F,
-    px,
-    py,
-    endx,
-    endy,
-    EDGE,
-    WALL,
-    TRAIL,
-    REVEAL) = settings
+     E,
+     F,
+     px,
+     py,
+     endx,
+     endy,
+     EDGE,
+     WALL,
+     TRAIL,
+     REVEAL) = settings
     # to load your file variables into variables
     surprise, asd = readfile("surprise.txt")
     win, dsa = readfile("win.txt")  # to load your file content into a list
@@ -142,8 +146,7 @@ while True:
     labyrinth_map[py][px] = P
     labyrinth_map[endy][endx] = E
     mapfog[py][px] = P
-    revealrange = range(-REVEAL, REVEAL + 1) #-1, 0, 1
-
+    revealrange = range(-REVEAL, REVEAL + 1)  # -1, 0, 1
 
     if EDGE > 0:  # reaveals map edge if it has any
         for i in range(EDGE):
@@ -156,7 +159,6 @@ while True:
         for i in revealrange:
             for z in revealrange:
                 mapfog[py + i][px + z] = labyrinth_map[py + i][px + z]
-
 
     while True:  # main loop
         level_over = False
