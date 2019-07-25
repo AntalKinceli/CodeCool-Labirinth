@@ -10,8 +10,8 @@ E = "O"  # endpoint mark
 F = "Z"  # fog mark
 px = 1  # + 1 the reall cordinate
 py = 1  # + 1 the reall cordinate
-endx = 8  # + 1 the reall cordinate
-endy = 5  # + 1 the reall cordinate
+endx = 1  # + 1 the reall cordinate
+endy = 2  # + 1 the reall cordinate
 EDGE = 1  # map edge length
 WALL = ["|", "-"]  # wall marks
 TRAIL = "."  # player trail mark
@@ -71,7 +71,7 @@ def main_print(x, y):
 
 def move(x, y, z, f):
     direction = ""
-    while direction not in ("w", "a", "s", "d", "q", "0", "1"):
+    while direction not in ("w", "a", "s", "d", "q"):
         direction = getch()
         continue
     if direction == "q":
@@ -104,25 +104,27 @@ def checkwin(x):
 # load tutorial to a list / aternate w/ previous line
 
 def mainmenu():
+    global mapfog
+    x = ""
     file = open("main_menu.txt", "r")
     cont = file.read()
     print(cont)
     file.close()
-    mm = input()
+    mm = getch() #input()
     if mm == "0":
-        labyrinth_map = readfile("tutorial_map.txt")
+        x = readfile("tutorial_map.txt")
     elif mm == "1":
-        labyrinth_map = readfile("first_map.txt")
+        x = readfile("first_map.txt")
+    elif mm == "q":
+        exit()
+    return x
+    mapfog = blank_map(len(labyrinth_map[0]), len(labyrinth_map), F)
+    main_print(mapfog, surprise)
 
-file = open("main_menu.txt", "r")
-cont = file.read()
-print(cont)
-file.close()
-mm = input()
-if mm == "0":
-    labyrinth_map = readfile("tutorial_map.txt")
-elif mm == "1":
-    labyrinth_map = readfile("first_map.txt")
+
+
+
+labyrinth_map = mainmenu()
 
 surprise = readfile("surprise.txt")  # to load your file content into a list
 win = readfile("win.txt")  # to load your file content into a list
@@ -150,7 +152,6 @@ for i in labyrinth_map:  # reaveals stuff around player
 
 
 while True:  # main loop
-    
     main_print(mapfog, surprise)
     checkwin(win)
     labyrinth_map[py][px] = TRAIL  # switches player mark to trail mark
