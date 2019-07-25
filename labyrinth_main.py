@@ -5,19 +5,6 @@ import os
 import tty
 import termios
 
-P = "X"  # player mark
-E = "O"  # endpoint mark
-F = "Z"  # fog mark
-px = 1  # + 1 the reall cordinate
-py = 1  # + 1 the reall cordinate
-endx = 1  # + 1 the reall cordinate
-endy = 2  # + 1 the reall cordinate
-EDGE = 1  # map edge length
-WALL = ["|", "-"]  # wall marks
-TRAIL = "."  # player trail mark
-REVEAL = 1  # player reveal zone range
-
-
 def getch():
     fd = sys.stdin.fileno()
     old_settings = termios.tcgetattr(fd)
@@ -33,10 +20,24 @@ def readfile(x):  # ("") reads your x file
     with open(x) as f:
         y = f.read().splitlines()
         z = []
+        h = []
         f.close
         for i in y:  # makes list array from string
-            z.append(list(i))
-        return z
+            if i[:1] != "#":
+                z.append(list(i))
+            else:
+                j = i.lstrip(i[0])
+                j = j[0:j.rfind("#")]
+                if j[:1] == "[":
+                    j = j.strip("[]")
+                    j = j.split(",")
+                    for l, k in enumerate(j):
+                        if k.isdigit() is True:
+                            j[l] = (int(j[l]))
+                elif j[:1].isdigit() is True:
+                    j = int(j)
+                h.append(j)
+        return z, h
 
 
 def blank_map(x, y, g):  # generates x width, y heigth list with full of g
@@ -97,11 +98,8 @@ def checkwin(x):
         printout(x)
         time.sleep(2)
         cls()
-        mainmenu()
+        return True
 
-
-# labyrinth_map = readfile("first_map.txt")  # to load your file content into a list
-# load tutorial to a list / aternate w/ previous line
 
 def mainmenu():
     x = ""
@@ -111,50 +109,66 @@ def mainmenu():
     file.close()
     mm = getch() #input()
     if mm == "0":
-        x = readfile("tutorial_map.txt")
+        x = "tutorial_map.txt"
     elif mm == "1":
-        x = readfile("first_map.txt")
+        x = "first_map.txt"
     elif mm == "q":
         exit()
     return x
 
+while True:
+    labyrinth_map = mainmenu()
+    surprise, asd = readfile("surprise.txt")  # to load your file content into a list
+    win, dsa = readfile("win.txt")  # to load your file content into a list
+    labyrinth_map, settings = readfile(labyrinth_map) # to load your file content into a list
+    (P,
+    E,
+    F,
+    px,
+    py,
+    endx,
+    endy,
+    EDGE,
+    WALL,
+    TRAIL,
+    REVEAL) = settings
+    # to load your file variables into variables
+    surprise, asd = readfile("surprise.txt")
+    win, dsa = readfile("win.txt")  # to load your file content into a list
+    # creating fog map with the same size as labyrinth
+    mapfog = blank_map(len(labyrinth_map[0]), len(labyrinth_map), F)
+    spaceing = math.ceil(((len(surprise) - len(labyrinth_map) + 1) / 2))
+
+    labyrinth_map[py][px] = P
+    labyrinth_map[endy][endx] = E
+    mapfog[py][px] = P
+    revealrange = range(-REVEAL, REVEAL + 1) #-1, 0, 1
 
 
-labyrinth_map = mainmenu()
-
-surprise = readfile("surprise.txt")  # to load your file content into a list
-win = readfile("win.txt")  # to load your file content into a list
-# creating fog map with the same size as labyrinth
-mapfog = blank_map(len(labyrinth_map[0]), len(labyrinth_map), F)
-spaceing = math.ceil(((len(surprise) - len(labyrinth_map) + 1) / 2))
-
-labyrinth_map[py][px] = P
-labyrinth_map[endy][endx] = E
-mapfog[py][px] = P
-revealrange = range(-REVEAL, REVEAL + 1)
-
-
-if EDGE > 0:  # reaveals map edge if it has any
-    for i in range(EDGE):
-        mapfog[0 + i] = labyrinth_map[0 + i]
-        mapfog[-1 - i] = labyrinth_map[-1 - i]
-        for z, x in enumerate(labyrinth_map):
-            mapfog[z][0 + i] = labyrinth_map[z][0 + i]
-            mapfog[z][-1 - i] = labyrinth_map[z][-1 - i]
-for i in labyrinth_map:  # reaveals stuff around player
-    for i in revealrange:
-        for z in revealrange:
-            mapfog[py + i][px + z] = labyrinth_map[py + i][px + z]
+    if EDGE > 0:  # reaveals map edge if it has any
+        for i in range(EDGE):
+            mapfog[0 + i] = labyrinth_map[0 + i]
+            mapfog[-1 - i] = labyrinth_map[-1 - i]
+            for z, x in enumerate(labyrinth_map):
+                mapfog[z][0 + i] = labyrinth_map[z][0 + i]
+                mapfog[z][-1 - i] = labyrinth_map[z][-1 - i]
+    for i in labyrinth_map:  # reaveals stuff around player
+        for i in revealrange:
+            for z in revealrange:
+                mapfog[py + i][px + z] = labyrinth_map[py + i][px + z]
 
 
-while True:  # main loop
-    main_print(mapfog, surprise)
-    checkwin(win)
-    labyrinth_map[py][px] = TRAIL  # switches player mark to trail mark
-    mapfog[py][px] = labyrinth_map[py][px]
-    py, px = move(labyrinth_map, mapfog, py, px)
-    labyrinth_map[py][px] = P  # update player position
-    mapfog[py][px] = P  # update player position
-    for i in revealrange:  # reaveal stuff around player
-        for z in revealrange:
-            mapfog[py + i][px + z] = labyrinth_map[py + i][px + z]
+    while True:  # main loop
+        level_over = False
+        main_print(mapfog, surprise)
+        level_over = checkwin(win)
+        if level_over is True:
+            break
+        labyrinth_map[py][px] = TRAIL  # switches player mark to trail mark
+        mapfog[py][px] = labyrinth_map[py][px]
+        py, px = move(labyrinth_map, mapfog, py, px)
+        labyrinth_map[py][px] = P  # update player position
+        mapfog[py][px] = P  # update player position
+        for i in revealrange:  # reaveal stuff around player
+            for z in revealrange:
+                mapfog[py + i][px + z] = labyrinth_map[py + i][px + z]

@@ -1,3 +1,14 @@
+#X# player (mark P =)
+#O# endpoint (mark E =)
+#Z# fog mark (F =)
+#1# + 1 the reall cordinate (px =)
+#1# + 1 the reall cordinate (py =)
+#8# + 1 the reall cordinate (endx =)
+#5# + 1 the reall cordinate (endy =)
+#1# map edge length (EDGE =)
+#[|,-,1]# wall marks (WALL =)
+#.# player trail mark (TRAIL =)
+#1# player reveal zone range (REVEAL =)
  ______________________________________________________________________________ 
 /...|..........................|..........................|....................\
 |.........------|..............|..........................|.....................|
