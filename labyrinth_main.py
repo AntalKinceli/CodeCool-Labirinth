@@ -2,6 +2,8 @@ import time
 import math
 import sys
 import os
+import tty
+import termios
 
 P = "X"  # player mark
 E = "O"  # endpoint mark
@@ -14,6 +16,17 @@ EDGE = 1  # map edge length
 WALL = ["|", "-"]  # wall marks
 TRAIL = "."  # player trail mark
 REVEAL = 1  # player reveal zone range
+
+
+def getch():
+    fd = sys.stdin.fileno()
+    old_settings = termios.tcgetattr(fd)
+    try:
+        tty.setraw(sys.stdin.fileno())
+        ch = sys.stdin.read(1)
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+    return ch
 
 
 def readfile(x):  # ("") reads your x file
@@ -43,6 +56,7 @@ def printout(x):
 
 
 def main_print(x, y):
+    cls()
     if len(y) > len(x):
         print("-" * len(x[0]))
         for i in range(spaceing):
@@ -57,10 +71,10 @@ def main_print(x, y):
 
 def move(x, y, z, f):
     direction = ""
-    while direction not in ("w", "a", "s", "d", "quit"):
-        direction = input("Give me WASD:")
+    while direction not in ("w", "a", "s", "d", "q"):
+        direction = getch()
         continue
-    if direction == "quit":
+    if direction == "q":
         sys.exit()
     elif direction == "w" and z - 1 - EDGE >= 0 and x[z - 1][f] not in WALL:
         z -= 1
@@ -71,6 +85,7 @@ def move(x, y, z, f):
     elif direction == "d" and len(x[0]) > f + 1 + EDGE and x[z][f + 1] not in WALL:
         f += 1
     else:
+        cls()
         printout(surprise)
         time.sleep(1.5)
     return z, f
@@ -85,7 +100,7 @@ def checkwin(x):
 
 # labyrinth_map = readfile("first_map.txt")  # to load your file content into a list
 # load tutorial to a list / aternate w/ previous line
-labyrinth_map = readfile("tutorial_map.txt")
+labyrinth_map = readfile("first_map.txt")
 surprise = readfile("surprise.txt")  # to load your file content into a list
 win = readfile("win.txt")  # to load your file content into a list
 # creating fog map with the same size as labyrinth
