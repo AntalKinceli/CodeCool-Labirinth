@@ -1,11 +1,7 @@
 Dávid:
-fog of war
-movement 
 sound
 
 Gábor:
-menu
 
 Anti:
-tutorial
 maps
