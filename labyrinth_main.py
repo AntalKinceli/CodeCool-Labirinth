@@ -90,7 +90,7 @@ def move(x, y, z, f):
     else:
         cls()
         printout(surprise)
-        time.sleep(1.5)
+        time.sleep(1)
     return z, f, h
 
 

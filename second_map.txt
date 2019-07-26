@@ -1,5 +1,5 @@
-ßOß player (mark P =)
-ßEß endpoint (mark E =)
+ßXß player (mark P =)
+ßOß endpoint (mark E =)
 ß*ß fog mark (F =)
 ß1ß + 1 the reall cordinate (px =)
 ß1ß + 1 the reall cordinate (py =)
