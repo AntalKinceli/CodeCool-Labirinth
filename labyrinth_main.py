@@ -75,23 +75,45 @@ def main_print(maplist, comparelist):  # prints map with spacing according anoth
         printout(maplist)
 
 
-# handels movement, returns player coordinates, and boolean
-def ingame_input_handler(fullmap, player_y, player_x):
-    direction = ""
+# handels movement, reveals in line  returns player coordinates, and boolean
+def ingame_input_handler(fullmap, fogmap, player_y, player_x, revealrange):
+    keypressed = ""
+    reveal = 1
     ingame_loop_continues = True
-    while direction not in ("w", "a", "s", "d", "q"):
-        direction = getch()
+    while keypressed not in ("w", "a", "s", "d", "q"):
+        keypressed = getch()
         continue
-    if direction == "q":
+    if keypressed == "q":
         ingame_loop_continues = False
-    elif direction == "w" and fullmap[player_y - 1][player_x] not in WALL:
+    elif keypressed == "w" and fullmap[player_y - 1][player_x] not in WALL:
         player_y -= 1
-    elif direction == "s" and fullmap[player_y + 1][player_x] not in WALL:
+        # while fullmap[player_y - reveal + 1][player_x] not in WALL:
+        #     for i in revealrange:
+        #         fogmap[player_y - reveal][player_x +
+        #                                   i] = fullmap[player_y - reveal][player_x + i]
+        #     reveal += 1
+    elif keypressed == "s" and fullmap[player_y + 1][player_x] not in WALL:
         player_y += 1
-    elif direction == "a" and fullmap[player_y][player_x - 1] not in WALL:
+        # while fullmap[player_y + reveal - 1][player_x] not in WALL:
+        #     for i in revealrange:
+        #         fogmap[player_y + reveal][player_x +
+        #                                   i] = fullmap[player_y + reveal][player_x + i]
+        #     reveal += 1
+    elif keypressed == "a" and fullmap[player_y][player_x - 1] not in WALL:
         player_x -= 1
-    elif direction == "d" and fullmap[player_y][player_x + 1] not in WALL:
+        # while fullmap[player_y][player_x - reveal + 1] not in WALL:
+        #     for i in revealrange:
+        #         fogmap[player_y + i][player_x -
+        #                              reveal] = fullmap[player_y + i][player_x - reveal]
+        #     reveal += 1
+    elif keypressed == "d" and fullmap[player_y][player_x + 1] not in WALL:
         player_x += 1
+        # while fullmap[player_y][player_x + reveal - 1] not in WALL:
+        #     for i in revealrange:
+        #         fogmap[player_y + i][player_x +
+        #                              reveal] = fullmap[player_y + i][player_x + reveal]
+        #     reveal += 1
+
     else:
         cls()
         printout(surprise)
@@ -188,7 +210,8 @@ while True:
         # draws trail mark on player in both map
         current_map[py][px], fogmap[py][px] = TRAIL, TRAIL
         # waits for and handels input, changes ingame_loop False if you hit "q"
-        py, px, ingame_loop = ingame_input_handler(current_map, py, px)
+        py, px, ingame_loop = ingame_input_handler(
+            current_map, fogmap, py, px, revealrange)
         # draws player mark in both map
         current_map[py][px], fogmap[py][px] = P, P
         # reaveals map around player in revealrange
