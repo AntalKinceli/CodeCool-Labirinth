@@ -71,7 +71,7 @@ def main_print(x, y):
         printout(x)
 
 
-def move(x, y, z, f):
+def move(x, y, player_y, player_x):
     direction = ""
     h = False
     while direction not in ("w", "a", "s", "d", "q"):
@@ -79,19 +79,19 @@ def move(x, y, z, f):
         continue
     if direction == "q":
         h = True
-    elif direction == "w" and z - 1 - EDGE >= 0 and x[z - 1][f] not in WALL:
-        z -= 1
-    elif direction == "s" and len(x) > z + 1 + EDGE and x[z + 1][f] not in WALL:
-        z += 1
-    elif direction == "a" and f - 1 - EDGE >= 0 and x[z][f - 1] not in WALL:
-        f -= 1
-    elif direction == "d" and len(x[0]) > f + 1 + EDGE and x[z][f + 1] not in WALL:
-        f += 1
+    elif direction == "w" and x[player_y - 1][player_x] not in WALL:
+        player_y -= 1
+    elif direction == "s" and x[player_y + 1][player_x] not in WALL:
+        player_y += 1
+    elif direction == "a" and x[player_y][player_x - 1] not in WALL:
+        player_x -= 1
+    elif direction == "d" and x[player_y][player_x + 1] not in WALL:
+        player_x += 1
     else:
         cls()
         printout(surprise)
         time.sleep(1)
-    return z, f, h
+    return player_y, player_x, h
 
 
 def checkwin(x):
@@ -138,7 +138,6 @@ while True:
      py,
      endx,
      endy,
-     EDGE,
      WALL,
      TRAIL,
      REVEAL) = settings
@@ -154,13 +153,14 @@ while True:
     mapfog[py][px] = P
     revealrange = range(-REVEAL, REVEAL + 1)  # -1, 0, 1
 
-    if EDGE > 0:  # reaveals map edge if it has any
-        for i in range(EDGE):
-            mapfog[0 + i] = labyrinth_map[0 + i]
-            mapfog[-1 - i] = labyrinth_map[-1 - i]
-            for z, x in enumerate(labyrinth_map):
-                mapfog[z][0 + i] = labyrinth_map[z][0 + i]
-                mapfog[z][-1 - i] = labyrinth_map[z][-1 - i]
+    for i, c in enumerate(labyrinth_map):
+        for z, g in enumerate(c):
+            if i == 0:
+                mapfog[i][z] = labyrinth_map[i][z]
+                mapfog[i - 1][z] = labyrinth_map[i - 1][z]
+            elif z == 0:
+                mapfog[i][z] = labyrinth_map[i][z]
+                mapfog[i][z - 1] = labyrinth_map[i][z - 1]
     for i in labyrinth_map:  # reaveals stuff around player
         for i in revealrange:
             for z in revealrange:
