@@ -6,79 +6,84 @@ import tty
 import termios
 
 
-def getch():
+def getch():  # waits for a single keypress and returns it
     fd = sys.stdin.fileno()
     old_settings = termios.tcgetattr(fd)
     try:
         tty.setraw(sys.stdin.fileno())
-        ch = sys.stdin.read(1)
+        keypressed = sys.stdin.read(1)
     finally:
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-    return ch
+    return keypressed
 
 
-def readfile(x):  # ("") reads your x file
-    with open(x) as f:
-        y = f.read().splitlines()
-        z = []
-        h = []
+def readfile(filename):  # maploader
+    with open(filename) as f:
+        mixedlist = f.read().splitlines()
+        maplist = []  # will contain only the map
+        variablelist = []  # will contain only the variables and list/-s
+        variablemark = "ß"
         f.close
-        for i in y:  # makes list array from string
-            if i[:1] != "ß":
-                z.append(list(i))
-            else:
+        for i in mixedlist:
+            if i[:1] != variablemark:  # separates map and variable/list lines
+                maplist.append(list(i))  # map section
+            else:  # variable/list section
+                # removes variable mark on variable lefts
                 j = i.lstrip(i[0])
-                j = j[0:j.rfind("ß")]
-                if j[:1] == "[":
-                    j = j.strip("[]")
-                    j = j.split(",")
+                # removes everything on variable rights
+                j = j[0:j.rfind(variablemark)]
+                if j[:1] == "[":  # check if this line is list or not
+                    j = j.strip("[]")  # strips "[]"
+                    j = j.split(",")  # makes list from string
                     for l, k in enumerate(j):
-                        if k.isdigit() is True:
+                        if k.isdigit() is True:  # checks if list contains only digit strings
+                            # converts only digit string into int
                             j[l] = (int(j[l]))
-                elif j[:1].isdigit() is True:
-                    j = int(j)
-                h.append(j)
-        return z, h
+                elif j[:1].isdigit() is True:  # checks if variable contains only digit strings
+                    j = int(j)  # converts only digit string into int
+                variablelist.append(j)
+        return maplist, variablelist
 
 
-def blank_map(x, y, g):  # generates x width, y heigth list with full of g
-    z = []
-    for i in range(y):
-        z.append([g] * x)
-    return z
+def blank_map(width, heigth, blankmark):  # generates x width, y heigth list with full of g
+    blankmaplist = []
+    for i in range(heigth):
+        blankmaplist.append([blankmark] * width)
+    return blankmaplist
 
 
-def cls():
+def cls():  # clears terminal
     os.system('cls' if os.name == 'nt' else 'clear')
 
 
-def printout(x):
-    for i in x:
+def printout(maplist):  # prints map without spacing
+    for i in maplist:
         print("".join(i))
 
 
-def main_print(x, y):
+def main_print(maplist, comparelist):  # prints map with spacing according another list lenght
     cls()
-    if len(y) > len(x):
-        print("-" * len(x[0]))
+    if len(comparelist) > len(maplist):
+        print("-" * len(maplist[0]))
         for i in range(spaceing):
             print()
-        printout(x)
+        printout(maplist)
         for i in range(spaceing):
             print()
-        print("-" * len(x[0]))
+        print("-" * len(maplist[0]))
     else:
-        printout(x)
+        printout(maplist)
 
 
-def move(fullmap, player_y, player_x):
+# handels movement, returns player coordinates, and boolean
+def ingame_input_handler(fullmap, player_y, player_x):
     direction = ""
-    loop_is_on = True
+    ingame_loop_continues = True
     while direction not in ("w", "a", "s", "d", "q"):
         direction = getch()
         continue
     if direction == "q":
-        loop_is_on = False
+        ingame_loop_continues = False
     elif direction == "w" and fullmap[player_y - 1][player_x] not in WALL:
         player_y -= 1
     elif direction == "s" and fullmap[player_y + 1][player_x] not in WALL:
@@ -91,24 +96,23 @@ def move(fullmap, player_y, player_x):
         cls()
         printout(surprise)
         time.sleep(1)
-    return player_y, player_x, loop_is_on
+    return player_y, player_x, ingame_loop_continues
 
 
-def checkwin(x):
-    boolean = True
+# prints win screen and returns False if win condition is true
+def checkwin(winscreen, ingame_loop_continues):
     if py == endy and px == endx:
         cls()
-        printout(x)
+        printout(winscreen)
         time.sleep(2)
         cls()
-        boolean = False
-    return boolean
+        ingame_loop_continues = False
+    return ingame_loop_continues
 
 
-def mainmenu():  # dislpays maps and returns the chosen one, breaks the main loop if you hit "q"
-
+def mainmenu():  # dislpays maps and returns the chosen map filename, breaks the main loop if you hit "q"
     cls()
-    x = ""
+    mapfilename = ""
     mm = ""
     file = open("main_menu.txt", "r")
     cont = file.read()
@@ -117,14 +121,14 @@ def mainmenu():  # dislpays maps and returns the chosen one, breaks the main loo
     while mm not in ["0", "1", "2", "q"]:
         mm = getch()  # input()
     if mm == "0":
-        x = "tutorial_map.txt"
+        mapfilename = "tutorial_map.txt"
     elif mm == "1":
-        x = "first_map.txt"
+        mapfilename = "first_map.txt"
     elif mm == "2":
-        x = "second_map.txt"
+        mapfilename = "second_map.txt"
     elif mm == "q":
         exit()
-    return x
+    return mapfilename
 
 
 # main loop
@@ -179,13 +183,17 @@ while True:
     # ingame loop
     ingame_loop = True
     while ingame_loop:
+        # prints fogmap if surprise is larger then fogmap, then ads spaceing
         main_print(fogmap, surprise)
-        current_map[py][px] = TRAIL  # switches player mark to trail mark
-        fogmap[py][px] = current_map[py][px]
-        py, px, ingame_loop = move(current_map, py, px)
-        ingame_loop = checkwin(win)
-        current_map[py][px] = P  # update player position
-        fogmap[py][px] = P  # update player position
-        for i in revealrange:  # reaveal stuff around player
+        # draws trail mark on player in both map
+        current_map[py][px], fogmap[py][px] = TRAIL, TRAIL
+        # waits for and handels input, changes ingame_loop False if you hit "q"
+        py, px, ingame_loop = ingame_input_handler(current_map, py, px)
+        # draws player mark in both map
+        current_map[py][px], fogmap[py][px] = P, P
+        # reaveals map around player in revealrange
+        for i in revealrange:
             for z in revealrange:
                 fogmap[py + i][px + z] = current_map[py + i][px + z]
+        # sets ingame_loop False if you won, else returns ingame_loop unchanged
+        ingame_loop = checkwin(win, ingame_loop)
