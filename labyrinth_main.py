@@ -71,7 +71,7 @@ def main_print(x, y):
         printout(x)
 
 
-def move(x, y, player_y, player_x):
+def move(fullmap, player_y, player_x):
     direction = ""
     h = False
     while direction not in ("w", "a", "s", "d", "q"):
@@ -79,13 +79,13 @@ def move(x, y, player_y, player_x):
         continue
     if direction == "q":
         h = True
-    elif direction == "w" and x[player_y - 1][player_x] not in WALL:
+    elif direction == "w" and fullmap[player_y - 1][player_x] not in WALL:
         player_y -= 1
-    elif direction == "s" and x[player_y + 1][player_x] not in WALL:
+    elif direction == "s" and fullmap[player_y + 1][player_x] not in WALL:
         player_y += 1
-    elif direction == "a" and x[player_y][player_x - 1] not in WALL:
+    elif direction == "a" and fullmap[player_y][player_x - 1] not in WALL:
         player_x -= 1
-    elif direction == "d" and x[player_y][player_x + 1] not in WALL:
+    elif direction == "d" and fullmap[player_y][player_x + 1] not in WALL:
         player_x += 1
     else:
         cls()
@@ -125,19 +125,14 @@ def mainmenu():
 
 
 while True:
-    labyrinth_map = mainmenu()
-    # to load your file content into a list
+    current_map = mainmenu()
     surprise, asd = readfile("surprise.txt")
     win, dsa = readfile("win.txt")  # to load your file content into a list
     # to load your file content into a list
-    labyrinth_map, settings = readfile(labyrinth_map)
+    current_map, settings = readfile(current_map)
     (P,
      E,
      F,
-     px,
-     py,
-     endx,
-     endy,
      WALL,
      TRAIL,
      REVEAL) = settings
@@ -145,26 +140,31 @@ while True:
     surprise, asd = readfile("surprise.txt")
     win, dsa = readfile("win.txt")  # to load your file content into a list
     # creating fog map with the same size as labyrinth
-    mapfog = blank_map(len(labyrinth_map[0]), len(labyrinth_map), F)
-    spaceing = math.ceil(((len(surprise) - len(labyrinth_map) + 1) / 2))
+    mapfog = blank_map(len(current_map[0]), len(current_map), F)
+    spaceing = math.ceil(((len(surprise) - len(current_map) + 1) / 2))
 
-    labyrinth_map[py][px] = P
-    labyrinth_map[endy][endx] = E
+
+    for i, c in enumerate(current_map):
+        for z, g in enumerate(c):
+            if i == 0:  # reveals map, sets player and end cordinates int variables
+                mapfog[i][z] = current_map[i][z]
+                mapfog[i - 1][z] = current_map[i - 1][z]
+            elif z == 0:
+                mapfog[i][z] = current_map[i][z]
+                mapfog[i][z - 1] = current_map[i][z - 1]
+            elif current_map[i][z] == P:
+                py = i
+                px = z
+            elif current_map[i][z] == E:
+                endy = i
+                endx = z
     mapfog[py][px] = P
     revealrange = range(-REVEAL, REVEAL + 1)  # -1, 0, 1
 
-    for i, c in enumerate(labyrinth_map):
-        for z, g in enumerate(c):
-            if i == 0:
-                mapfog[i][z] = labyrinth_map[i][z]
-                mapfog[i - 1][z] = labyrinth_map[i - 1][z]
-            elif z == 0:
-                mapfog[i][z] = labyrinth_map[i][z]
-                mapfog[i][z - 1] = labyrinth_map[i][z - 1]
-    for i in labyrinth_map:  # reaveals stuff around player
+    for i in current_map:  # reaveals stuff around player
         for i in revealrange:
             for z in revealrange:
-                mapfog[py + i][px + z] = labyrinth_map[py + i][px + z]
+                mapfog[py + i][px + z] = current_map[py + i][px + z]
 
     while True:  # main loop
         level_over = False
@@ -172,13 +172,13 @@ while True:
         level_over = checkwin(win)
         if level_over is True:
             break
-        labyrinth_map[py][px] = TRAIL  # switches player mark to trail mark
-        mapfog[py][px] = labyrinth_map[py][px]
-        py, px, level_over = move(labyrinth_map, mapfog, py, px)
+        current_map[py][px] = TRAIL  # switches player mark to trail mark
+        mapfog[py][px] = current_map[py][px]
+        py, px, level_over = move(current_map, py, px)
         if level_over is True:
             break
-        labyrinth_map[py][px] = P  # update player position
+        current_map[py][px] = P  # update player position
         mapfog[py][px] = P  # update player position
         for i in revealrange:  # reaveal stuff around player
             for z in revealrange:
-                mapfog[py + i][px + z] = labyrinth_map[py + i][px + z]
+                mapfog[py + i][px + z] = current_map[py + i][px + z]
