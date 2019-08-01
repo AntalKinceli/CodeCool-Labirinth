@@ -87,32 +87,32 @@ def ingame_input_handler(fullmap, fogmap, player_y, player_x, revealrange):
         ingame_loop_continues = False
     elif keypressed == "w" and fullmap[player_y - 1][player_x] not in WALL:
         player_y -= 1
-        # while fullmap[player_y - reveal + 1][player_x] not in WALL:
-        #     for i in revealrange:
-        #         fogmap[player_y - reveal][player_x +
-        #                                   i] = fullmap[player_y - reveal][player_x + i]
-        #     reveal += 1
+        while fullmap[player_y - reveal + 1][player_x] not in WALL:
+            for i in revealrange:
+                fogmap[player_y - reveal][player_x +
+                                          i] = fullmap[player_y - reveal][player_x + i]
+            reveal += 1
     elif keypressed == "s" and fullmap[player_y + 1][player_x] not in WALL:
         player_y += 1
-        # while fullmap[player_y + reveal - 1][player_x] not in WALL:
-        #     for i in revealrange:
-        #         fogmap[player_y + reveal][player_x +
-        #                                   i] = fullmap[player_y + reveal][player_x + i]
-        #     reveal += 1
+        while fullmap[player_y + reveal - 1][player_x] not in WALL:
+            for i in revealrange:
+                fogmap[player_y + reveal][player_x +
+                                          i] = fullmap[player_y + reveal][player_x + i]
+            reveal += 1
     elif keypressed == "a" and fullmap[player_y][player_x - 1] not in WALL:
         player_x -= 1
-        # while fullmap[player_y][player_x - reveal + 1] not in WALL:
-        #     for i in revealrange:
-        #         fogmap[player_y + i][player_x -
-        #                              reveal] = fullmap[player_y + i][player_x - reveal]
-        #     reveal += 1
+        while fullmap[player_y][player_x - reveal + 1] not in WALL:
+            for i in revealrange:
+                fogmap[player_y + i][player_x -
+                                     reveal] = fullmap[player_y + i][player_x - reveal]
+            reveal += 1
     elif keypressed == "d" and fullmap[player_y][player_x + 1] not in WALL:
         player_x += 1
-        # while fullmap[player_y][player_x + reveal - 1] not in WALL:
-        #     for i in revealrange:
-        #         fogmap[player_y + i][player_x +
-        #                              reveal] = fullmap[player_y + i][player_x + reveal]
-        #     reveal += 1
+        while fullmap[player_y][player_x + reveal - 1] not in WALL:
+            for i in revealrange:
+                fogmap[player_y + i][player_x +
+                                     reveal] = fullmap[player_y + i][player_x + reveal]
+            reveal += 1
 
     else:
         cls()
