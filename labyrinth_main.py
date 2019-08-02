@@ -132,31 +132,37 @@ def checkwin(winscreen, ingame_loop_continues):
     return ingame_loop_continues
 
 
-def mainmenu():  # dislpays maps and returns the chosen map filename, breaks the main loop if you hit "q"
+# dislpays maps in mapfoldername and returns the chosen map filename, breaks the main loop if you hit "q"
+def mainmenu(mapfoldername):
+    maplist = []
+    for file in os.listdir(mapfoldername):
+        if file.endswith(".txt"):
+            maplist.append(os.path.join("maps", file))
+    maplist.sort()
     cls()
     mapfilename = ""
     mm = ""
-    file = open("main_menu.txt", "r")
-    cont = file.read()
-    print(cont)
-    file.close()
-    while mm not in ["0", "1", "2", "q"]:
+    inputindex = list(range(len(maplist)))
+    for x, i in enumerate(inputindex):
+        inputindex[x] = str(i)
+    inputindex.append("q")
+    print("WHICH LEVEL WOULD YOU LIKE TO PLAY?\n\nPRESS 0 FOR TUTORIAL\n")
+    for i in inputindex[1:-1]:
+        print("PRESS " + i + " FOR LEVEL " + i + "\n")
+    print("PRESS " + inputindex[-1] + " FOR EXIT")
+    while mm not in inputindex:
         mm = getch()  # input()
-    if mm == "0":
-        mapfilename = "tutorial_map.txt"
-    elif mm == "1":
-        mapfilename = "first_map.txt"
-    elif mm == "2":
-        mapfilename = "second_map.txt"
-    elif mm == "q":
+    if mm == "q":
         exit()
+    else:
+        mapfilename = maplist[int(mm)]
     return mapfilename
 
 
 # main loop
 while True:
-    # sets your choosen map into current_map variable
-    current_map = mainmenu()
+    # dislpays maps in "maps" foolder and sets your choosen map into current_map variable
+    current_map = mainmenu("maps")
 
     # load your file content into lists
     current_map, settings = readfile(current_map)
