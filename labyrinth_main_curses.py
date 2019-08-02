@@ -1,20 +1,5 @@
-import math
-import sys
 import os
-import tty
-import termios
 import curses
-
-
-def getch():  # waits for a single keypress and returns it
-    fd = sys.stdin.fileno()
-    old_settings = termios.tcgetattr(fd)
-    try:
-        tty.setraw(sys.stdin.fileno())
-        keypressed = sys.stdin.read(1)
-    finally:
-        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-    return keypressed
 
 
 def readfile(filename):  # maploader
@@ -52,24 +37,12 @@ def blank_map(width, heigth, blankmark):  # generates x width, y heigth list wit
     return blankmaplist
 
 
-def cls():  # clears terminal
-    os.system('cls' if os.name == 'nt' else 'clear')
-
-
 def printout(maplist, mainscreen):  # prints map without spacing
-    y = 0
-    x = 0
-    mainscreen.move(y, x)
-    for i in maplist:
+    for y, i in enumerate(maplist):
+        mainscreen.move(y, 0)
         for z in i:
             mainscreen.addstr(z)
-        y += 1
-        mainscreen.move(y, x)
     mainscreen.refresh()
-
-
-def main_print(maplist, mainscreen):  # prints map
-    printout(maplist, mainscreen)
 
 
 # handels movement, reveals in line  returns player coordinates, and boolean
@@ -125,7 +98,6 @@ def mainmenu(mapfoldername):
         if file.endswith(".txt"):
             maplist.append(os.path.join("maps", file))
     maplist.sort()
-    cls()
     mapfilename = ""
     mm = ""
     inputindex = list(range(len(maplist)))
@@ -137,7 +109,7 @@ def mainmenu(mapfoldername):
         print("PRESS " + i + " FOR LEVEL " + i + "\n")
     print("PRESS " + inputindex[-1] + " FOR EXIT")
     while mm not in inputindex:
-        mm = getch()  # input()
+        mm = input("")
     if mm == "q":
         exit()
     else:
@@ -147,10 +119,10 @@ def mainmenu(mapfoldername):
 
 # main loop
 while True:
-    # dislpays maps in "maps" foolder and sets your choosen map into current_map variable
+    # dislpays maps in "maps" folder and sets your choosen map into current_map variable
     current_map = mainmenu("maps")
 
-    # load your file content into lists
+    # load your file content into lists and variables
     current_map, settings = readfile(current_map)
     (P,
      E,
@@ -164,11 +136,10 @@ while True:
     # creates fog map with the same size as the current_map
     fogmap = blank_map(len(current_map[0]), len(current_map), F)
 
-    # sets spacing value and reaveal range
-    spaceing = math.ceil(((len(surprise) - len(current_map) + 1) / 2))
+    # sets reaveal range
     revealrange = range(-REVEAL, REVEAL + 1)  # -1, 0, 1
 
-    # reveals map edge on fogman, searches for player and endpoint marks,
+    # reveals map edge on fogmap
     # searches for player and endpoint marks, and accordingly sets player and endpoint coordinates into variables
     for i, c in enumerate(current_map):
         for z, g in enumerate(c):
@@ -196,16 +167,14 @@ while True:
 
     # ingame loop
     ingame_loop = True
-    cls()
     mainscreen = curses.initscr()
     curses.noecho()  # disables any user input which is not curses
     curses.cbreak()  # unbufered input mode
     # keypad mode so speciel buttons will be returned easely
     mainscreen.keypad(True)
-
     while ingame_loop:
         # prints fogmap
-        main_print(fogmap, mainscreen)
+        printout(fogmap, mainscreen)
         # draws trail mark on player in both map
         current_map[py][px], fogmap[py][px] = TRAIL, TRAIL
         # waits for and handels input, changes ingame_loop False if you hit "q"
@@ -219,4 +188,5 @@ while True:
                 fogmap[py + i][px + z] = current_map[py + i][px + z]
         # sets ingame_loop False if you won, else returns ingame_loop unchanged
         ingame_loop = checkwin(win, ingame_loop)
+    mainscreen.clear()
     curses.endwin()
