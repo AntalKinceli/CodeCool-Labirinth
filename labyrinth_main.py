@@ -199,7 +199,7 @@ while True:
                 endy = i
                 endx = z
 
-    # draws player mark into fogmap
+    # draws player mark into fogmap according t player coordinates (py, px)
     fogmap[py][px] = P
 
     # reweals map around player in revealrange
