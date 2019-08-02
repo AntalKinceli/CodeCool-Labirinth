@@ -67,14 +67,20 @@ def readfile(filename):  # maploader
         return maplist, variablelist
 
 
-maplist = readfile("maps/00.txt")[0]
+# for x, i in enumerate(maplist):
+#     print(x)
+#     for z in i:
+#         pass
+maplist = readfile("maps/03.txt")[0]
 scr = curses.initscr()
+scr.move(0, 0)
 y = 0
-x = 0
-for i in maplist:
+for x, i in enumerate(maplist):
+
     for z in i:
         scr.addstr(z)
     y += 1
-    scr.move(y, x)
+    scr.move(x, 0)
+scr.addstr(str(y))
 s = scr.getkey()
 scr.addstr(s)
