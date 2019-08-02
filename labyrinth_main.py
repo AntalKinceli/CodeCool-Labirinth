@@ -173,7 +173,7 @@ while True:
      TRAIL,
      REVEAL) = settings
     surprise = readfile("surprise.txt")[0]
-    win = readfile("win.txt")[0]
+    win = readfile("win_2.txt")[0]
 
     # creates fog map with the same size as the current_map
     fogmap = blank_map(len(current_map[0]), len(current_map), F)
