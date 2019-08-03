@@ -3,39 +3,38 @@ import curses
 
 
 def disable_curses():
-    mainscreen.clear
+    mainscreen.clear  # clears screen
     curses.nocbreak()  # disable mode
     mainscreen.keypad(False)  # disable mode
     curses.echo()  # disable mode
-    curses.endwin()  # exits curses modeS
+    curses.endwin()  # exits curses modes
 
 
-def readfile(filename):  # maploader
+def maploader(filename):  # reads map from filename and returns its values and map lines separately
     with open(filename) as f:
-        mixedlist = f.read().splitlines()
+        file_readout_list = f.read().splitlines()
         maplist = []  # will contain only the map
-        variablelist = []  # will contain only the variables and list/-s
+        VorL_list = []  # will contain only the variables and list/-s
         variablemark = "ß"
         f.close
-        for i in mixedlist:
-            if i[:1] != variablemark:  # separates map and variable/list lines
-                maplist.append(list(i))  # map section
+        for line in file_readout_list:
+            if line[:1] != variablemark:  # separates map lines and variable/list lines
+                maplist.append(list(line))  # map section
             else:  # variable/list section
                 # removes variable mark on variable lefts
-                j = i.lstrip(i[0])
-                # removes everything on variable rights
-                j = j[0:j.rfind(variablemark)]
-                if j[:1] == "[":  # check if this line is list or not
-                    j = j.strip("[]")  # strips "[]"
-                    j = j.split(",")  # makes list from string
-                    for l, k in enumerate(j):
-                        if k.isdigit() is True:  # checks if list contains only digit strings
-                            # converts only digit string into int
-                            j[l] = (int(j[l]))
-                elif j[:1].isdigit() is True:  # checks if variable contains only digit strings
-                    j = int(j)  # converts only digit string into int
-                variablelist.append(j)
-        return maplist, variablelist
+                VorL = line.lstrip(line[0])
+                # removes everything on from the right side
+                VorL = VorL[0:VorL.rfind(variablemark)]
+                if VorL[:1] == "[":  # check if this is list or not
+                    VorL = VorL.strip("[]")  # strips "[]"
+                    VorL = VorL.split(",")  # makes list from string
+                    for index, item in enumerate(VorL):
+                        if item.isdigit() is True:  # checks if item in list contains only digits
+                            VorL[index] = (int(VorL[index]))
+                elif VorL[:1].isdigit() is True:  # checks if variable contains only digits
+                    VorL = int(VorL)
+                VorL_list.append(VorL)
+        return maplist, VorL_list
 
 
 def blank_map(width, heigth, blankmark):  # generates x width, y heigth list with full of g
@@ -45,14 +44,14 @@ def blank_map(width, heigth, blankmark):  # generates x width, y heigth list wit
     return blankmaplist
 
 
-def drawscreen(maplist, mainscreen):  # prints map without spacing
+def drawscreen(maplist, mainscreen, border=0):  # prints map without spacing
     try:
-        for y, i in enumerate(maplist):
-            mainscreen.move(y + 1, 1)
-            for z in i:
-                mainscreen.addstr(z)
+        for index, nlist in enumerate(maplist):
+            mainscreen.move(index + border, border)
+            for item in nlist:
+                mainscreen.addstr(item)
         mainscreen.refresh()
-    except:
+    except:  # handels crash if terminal is to small
         disable_curses()
         print("Terminal is to small")
         input("Press Enter to exit")
@@ -62,7 +61,7 @@ def drawscreen(maplist, mainscreen):  # prints map without spacing
 # handels movement, reveals in line  returns player coordinates, and boolean
 def ingame_input_handler(fullmap, fogmap, player_y, player_x, revealrange, mainscreen):
     keypressed = ""
-    reveal = 1
+    reveal = revealrange[-1]
     ingame_loop_continues = True
     curses.flushinp()
     keypressed = mainscreen.getch()
@@ -106,42 +105,40 @@ def checkwin(winscreen, ingame_loop_continues):
     return ingame_loop_continues
 
 
-# dislpays maps in mapfoldername and returns the chosen map filename, breaks the main loop if you hit "q"
-def mainmenu(mapfoldername, mainscreen):
+# dislpays maps in map_foldername and returns the chosen map filename, breaks the main loop if you hit "q"
+def mainmenu(map_foldername, mainscreen):
     maplist = []
-    for file in os.listdir(mapfoldername):
+    mapchoose = ""
+    exit_key = "q"
+    for file in os.listdir(map_foldername):
         if file.endswith(".txt"):
             maplist.append(os.path.join("maps", file))
     maplist.sort()
-    mapfilename = ""
-    mm = ""
-    inputindex = list(range(len(maplist)))
-    for x, i in enumerate(inputindex):
-        inputindex[x] = str(i)
-    inputindex.append("q")
+    valid_input = [str(index) for index, item in enumerate(maplist)]
+    valid_input.append(exit_key)
     mainscreen.addstr(
         "WHICH LEVEL WOULD YOU LIKE TO PLAY?\n\n\nPRESS 0 FOR TUTORIAL\n\n")
-    for i in inputindex[1:-1]:
+    for i in valid_input[1:-1]:  # from the second to the second from last
         mainscreen.addstr("PRESS " + i + " FOR LEVEL " + i + "\n\n")
-    mainscreen.addstr("PRESS " + inputindex[-1] + " FOR EXIT")
+    mainscreen.addstr("PRESS " + exit_key.upper() + " FOR EXIT")
     mainscreen.refresh()
-    while mm not in inputindex:
-        mm = chr(mainscreen.getch())
-    if mm == "q":
+    while mapchoose not in valid_input:
+        mapchoose = chr(mainscreen.getch())
+    if mapchoose == exit_key:
         disable_curses()
         exit()
     else:
-        mapfilename = maplist[int(mm)]
+        mapfilename = maplist[int(mapchoose)]
     mainscreen.clear()
     return mapfilename
 
 
 mainscreen = curses.initscr()
-curses.noecho()  # disables any user input which is not curses
+curses.noecho()  # limits input for curses only
 curses.cbreak()  # unbufered input mode
 # keypad mode so special buttons will be returned easely
 mainscreen.keypad(True)
-curses.start_color()
+curses.start_color()  # initialize the default color set
 
 # main loop
 while True:
@@ -150,15 +147,15 @@ while True:
     current_map = mainmenu("maps", mainscreen)
 
     # load your file content into lists and variables
-    current_map, settings = readfile(current_map)
+    current_map, settings = maploader(current_map)
     (P,
      E,
      F,
      WALL,
      TRAIL,
      REVEAL) = settings
-    surprise = readfile("surprise.txt")[0]
-    win = readfile("win_2.txt")[0]
+    surprise = maploader("surprise.txt")[0]
+    win = maploader("win_2.txt")[0]
 
     # creates fog map with the same size as the current_map
     fogmap = blank_map(len(current_map[0]), len(current_map), F)
@@ -168,20 +165,20 @@ while True:
 
     # reveals map edge on fogmap
     # searches for player and endpoint marks, and accordingly sets player and endpoint coordinates into variables
-    for i, c in enumerate(current_map):
-        for z, g in enumerate(c):
-            if i == 0:
-                fogmap[i][z] = current_map[i][z]
-                fogmap[i - 1][z] = current_map[i - 1][z]
-            elif z == 0:
-                fogmap[i][z] = current_map[i][z]
-                fogmap[i][z - 1] = current_map[i][z - 1]
-            elif current_map[i][z] == P:
-                py = i
-                px = z
-            elif current_map[i][z] == E:
-                endy = i
-                endx = z
+    for Y_index, Y_item in enumerate(current_map):
+        for X_index, X_item in enumerate(Y_item):
+            if Y_index == 0:
+                fogmap[Y_index][X_index] = current_map[Y_index][X_index]
+                fogmap[Y_index - 1][X_index] = current_map[Y_index - 1][X_index]
+            elif X_index == 0:
+                fogmap[Y_index][X_index] = current_map[Y_index][X_index]
+                fogmap[Y_index][X_index - 1] = current_map[Y_index][X_index - 1]
+            elif current_map[Y_index][X_index] == P:
+                py = Y_index
+                px = X_index
+            elif current_map[Y_index][X_index] == E:
+                endy = Y_index
+                endx = X_index
 
     # draws player mark into fogmap according t player coordinates (py, px)
     fogmap[py][px] = P
@@ -194,7 +191,7 @@ while True:
 
     # ingame loop
     ingame_loop = True
-    mainscreen.border(0)
+    # mainscreen.border(0)
     while ingame_loop:
         # draws fogmap on mainscreen
         drawscreen(fogmap, mainscreen)
