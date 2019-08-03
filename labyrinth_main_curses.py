@@ -2,6 +2,14 @@ import os
 import curses
 
 
+def disable_curses():
+    mainscreen.clear
+    curses.nocbreak()  # disable mode
+    mainscreen.keypad(False)  # disable mode
+    curses.echo()  # disable mode
+    curses.endwin()  # exits curses modeS
+
+
 def readfile(filename):  # maploader
     with open(filename) as f:
         mixedlist = f.read().splitlines()
@@ -37,12 +45,18 @@ def blank_map(width, heigth, blankmark):  # generates x width, y heigth list wit
     return blankmaplist
 
 
-def printout(maplist, mainscreen):  # prints map without spacing
-    for y, i in enumerate(maplist):
-        mainscreen.move(y + 1, 1)
-        for z in i:
-            mainscreen.addstr(z)
-    mainscreen.refresh()
+def drawscreen(maplist, mainscreen):  # prints map without spacing
+    try:
+        for y, i in enumerate(maplist):
+            mainscreen.move(y + 1, 1)
+            for z in i:
+                mainscreen.addstr(z)
+        mainscreen.refresh()
+    except:
+        disable_curses()
+        print("Terminal is to small")
+        input("Press Enter to exit")
+        exit()
 
 
 # handels movement, reveals in line  returns player coordinates, and boolean
@@ -50,8 +64,9 @@ def ingame_input_handler(fullmap, fogmap, player_y, player_x, revealrange, mains
     keypressed = ""
     reveal = 1
     ingame_loop_continues = True
+    curses.flushinp()
     keypressed = mainscreen.getch()
-    if keypressed == curses.KEY_BACKSPACE:
+    if chr(keypressed) == "q":
         ingame_loop_continues = False
     elif keypressed == curses.KEY_UP and fullmap[player_y - 1][player_x] not in WALL:
         player_y -= 1
@@ -113,6 +128,7 @@ def mainmenu(mapfoldername, mainscreen):
     while mm not in inputindex:
         mm = chr(mainscreen.getch())
     if mm == "q":
+        disable_curses()
         exit()
     else:
         mapfilename = maplist[int(mm)]
@@ -120,13 +136,17 @@ def mainmenu(mapfoldername, mainscreen):
     return mapfilename
 
 
+mainscreen = curses.initscr()
+curses.noecho()  # disables any user input which is not curses
+curses.cbreak()  # unbufered input mode
+# keypad mode so special buttons will be returned easely
+mainscreen.keypad(True)
+curses.start_color()
+
 # main loop
 while True:
-    mainscreen = curses.initscr()
-    curses.noecho()  # disables any user input which is not curses
-    curses.cbreak()  # unbufered input mode
 
-    # dislpays maps in "maps" folder and sets your choosen map into current_map variable
+    # dislpays maps in "maps" folder on mainscreen and sets your choosen map into current_map variable
     current_map = mainmenu("maps", mainscreen)
 
     # load your file content into lists and variables
@@ -175,14 +195,12 @@ while True:
     # ingame loop
     ingame_loop = True
     mainscreen.border(0)
-    # keypad mode so special buttons will be returned easely
-    mainscreen.keypad(True)
     while ingame_loop:
-        # prints fogmap
-        printout(fogmap, mainscreen)
+        # draws fogmap on mainscreen
+        drawscreen(fogmap, mainscreen)
         # draws trail mark on player in both map
         current_map[py][px], fogmap[py][px] = TRAIL, TRAIL
-        # waits for and handels input, changes ingame_loop False if you hit "q"
+        # waits for and handels input, refreshes main_screen, changes ingame_loop False if you hit "q"
         py, px, ingame_loop = ingame_input_handler(
             current_map, fogmap, py, px, revealrange, mainscreen)
         # draws player mark in both map
@@ -194,4 +212,3 @@ while True:
         # sets ingame_loop False if you won, else returns ingame_loop unchanged
         ingame_loop = checkwin(win, ingame_loop)
     mainscreen.clear()
-    curses.endwin()
