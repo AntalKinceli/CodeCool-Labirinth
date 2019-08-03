@@ -39,7 +39,7 @@ def blank_map(width, heigth, blankmark):  # generates x width, y heigth list wit
 
 def printout(maplist, mainscreen):  # prints map without spacing
     for y, i in enumerate(maplist):
-        mainscreen.move(y, 0)
+        mainscreen.move(y + 1, 1)
         for z in i:
             mainscreen.addstr(z)
     mainscreen.refresh()
@@ -92,7 +92,7 @@ def checkwin(winscreen, ingame_loop_continues):
 
 
 # dislpays maps in mapfoldername and returns the chosen map filename, breaks the main loop if you hit "q"
-def mainmenu(mapfoldername):
+def mainmenu(mapfoldername, mainscreen):
     maplist = []
     for file in os.listdir(mapfoldername):
         if file.endswith(".txt"):
@@ -104,23 +104,30 @@ def mainmenu(mapfoldername):
     for x, i in enumerate(inputindex):
         inputindex[x] = str(i)
     inputindex.append("q")
-    print("WHICH LEVEL WOULD YOU LIKE TO PLAY?\n\nPRESS 0 FOR TUTORIAL\n")
+    mainscreen.addstr(
+        "WHICH LEVEL WOULD YOU LIKE TO PLAY?\n\n\nPRESS 0 FOR TUTORIAL\n\n")
     for i in inputindex[1:-1]:
-        print("PRESS " + i + " FOR LEVEL " + i + "\n")
-    print("PRESS " + inputindex[-1] + " FOR EXIT")
+        mainscreen.addstr("PRESS " + i + " FOR LEVEL " + i + "\n\n")
+    mainscreen.addstr("PRESS " + inputindex[-1] + " FOR EXIT")
+    mainscreen.refresh()
     while mm not in inputindex:
-        mm = input("")
+        mm = chr(mainscreen.getch())
     if mm == "q":
         exit()
     else:
         mapfilename = maplist[int(mm)]
+    mainscreen.clear()
     return mapfilename
 
 
 # main loop
 while True:
+    mainscreen = curses.initscr()
+    curses.noecho()  # disables any user input which is not curses
+    curses.cbreak()  # unbufered input mode
+
     # dislpays maps in "maps" folder and sets your choosen map into current_map variable
-    current_map = mainmenu("maps")
+    current_map = mainmenu("maps", mainscreen)
 
     # load your file content into lists and variables
     current_map, settings = readfile(current_map)
@@ -167,10 +174,8 @@ while True:
 
     # ingame loop
     ingame_loop = True
-    mainscreen = curses.initscr()
-    curses.noecho()  # disables any user input which is not curses
-    curses.cbreak()  # unbufered input mode
-    # keypad mode so speciel buttons will be returned easely
+    mainscreen.border(0)
+    # keypad mode so special buttons will be returned easely
     mainscreen.keypad(True)
     while ingame_loop:
         # prints fogmap
