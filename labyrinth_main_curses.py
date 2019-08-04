@@ -37,11 +37,12 @@ def maploader(filename):  # reads map from filename and returns its values and m
         return maplist, VorL_list
 
 
-def blank_map(width, heigth, blankmark):  # generates x width, y heigth list with full of g
-    blankmaplist = []
-    for i in range(heigth):
-        blankmaplist.append([blankmark] * width)
-    return blankmaplist
+# generates x width, y heigth list with full of g
+def blank_screen(screen, width, heigth, blankmark, border=0):
+    for index in range(heigth):
+        mainscreen.move(index + border, border)
+        for z in range(width):
+            mainscreen.addstr(blankmark)
 
 
 def drawscreen(maplist, mainscreen, border=0):  # prints map without spacing
@@ -59,49 +60,58 @@ def drawscreen(maplist, mainscreen, border=0):  # prints map without spacing
 
 
 # handels movement, reveals in line  returns player coordinates, and boolean
-def ingame_input_handler(fullmap, fogmap, player_y, player_x, revealrange, mainscreen):
-    keypressed = ""
-    reveal = revealrange[-1]
+def ingame_input_handler(fullmap, player_y, player_x, player_mark, reveal, mainscreen):
+    keypressed = -1
+    revealrange = range(-reveal, reveal + 1)  # -1, 0, 1 by default
     ingame_loop_continues = True
-    curses.flushinp()
-    keypressed = mainscreen.getch()
+    while keypressed == -1:
+        keypressed = mainscreen.getch()
+    mainscreen.addstr(player_y, player_x, TRAIL)
     if chr(keypressed) == "q":
         ingame_loop_continues = False
     elif keypressed == curses.KEY_UP and fullmap[player_y - 1][player_x] not in WALL:
         player_y -= 1
+        player_mark = "A"
         while fullmap[player_y - reveal + 1][player_x] not in WALL:
             for i in revealrange:
-                fogmap[player_y - reveal][player_x +
-                                          i] = fullmap[player_y - reveal][player_x + i]
+                mainscreen.addstr(player_y - reveal, player_x + i,
+                                  fullmap[player_y - reveal][player_x + i])
             reveal += 1
     elif keypressed == curses.KEY_DOWN and fullmap[player_y + 1][player_x] not in WALL:
         player_y += 1
+        player_mark = "V"
         while fullmap[player_y + reveal - 1][player_x] not in WALL:
             for i in revealrange:
-                fogmap[player_y + reveal][player_x +
-                                          i] = fullmap[player_y + reveal][player_x + i]
+                mainscreen.addstr(player_y + reveal, player_x + i,
+                                  fullmap[player_y + reveal][player_x + i])
             reveal += 1
     elif keypressed == curses.KEY_LEFT and fullmap[player_y][player_x - 1] not in WALL:
         player_x -= 1
+        player_mark = "<"
         while fullmap[player_y][player_x - reveal + 1] not in WALL:
             for i in revealrange:
-                fogmap[player_y + i][player_x -
-                                     reveal] = fullmap[player_y + i][player_x - reveal]
+                mainscreen.addstr(player_y + i, player_x - reveal,
+                                  fullmap[player_y + i][player_x - reveal])
             reveal += 1
     elif keypressed == curses.KEY_RIGHT and fullmap[player_y][player_x + 1] not in WALL:
         player_x += 1
+        player_mark = ">"
         while fullmap[player_y][player_x + reveal - 1] not in WALL:
             for i in revealrange:
-                fogmap[player_y + i][player_x +
-                                     reveal] = fullmap[player_y + i][player_x + reveal]
+                mainscreen.addstr(player_y + i, player_x + reveal,
+                                  fullmap[player_y + i][player_x + reveal])
             reveal += 1
-    return player_y, player_x, ingame_loop_continues
+    return player_y, player_x, ingame_loop_continues, player_mark
 
 
 # prints win screen and returns False if win condition is true
 def checkwin(winscreen, ingame_loop_continues):
     if py == endy and px == endx:
         ingame_loop_continues = False
+        mainscreen.clear()
+        drawscreen(win, mainscreen)
+        mainscreen.refresh()
+        curses.napms(2000)
     return ingame_loop_continues
 
 
@@ -133,13 +143,20 @@ def mainmenu(map_foldername, mainscreen):
     return mapfilename
 
 
+def reveal_aura(reveal, screen, map, player_y, player_x):
+    revealrange = range(-reveal, reveal + 1)
+    for i in revealrange:
+        for z in revealrange:
+            mainscreen.addstr(py + i, px + z, current_map[py + i][px + z])
+
+
 mainscreen = curses.initscr()
 curses.noecho()  # limits input for curses only
 curses.cbreak()  # unbufered input mode
 # keypad mode so special buttons will be returned easely
-mainscreen.keypad(True)
+mainscreen.keypad(1)
 curses.start_color()  # initialize the default color set
-
+curses.curs_set(0)  # hides cursor
 # main loop
 while True:
 
@@ -153,59 +170,51 @@ while True:
      F,
      WALL,
      TRAIL,
-     REVEAL) = settings
-    surprise = maploader("surprise.txt")[0]
+     REVEAL,
+     FOG) = settings
     win = maploader("win_2.txt")[0]
 
-    # creates fog map with the same size as the current_map
-    fogmap = blank_map(len(current_map[0]), len(current_map), F)
+    # creates fog map with the same size as the current_map if enabled
+    if FOG == 1:
+        blank_screen(mainscreen, len(current_map[0]), len(current_map), F)
 
-    # sets reaveal range
-    revealrange = range(-REVEAL, REVEAL + 1)  # -1, 0, 1
-
-    # reveals map edge on fogmap
     # searches for player and endpoint marks, and accordingly sets player and endpoint coordinates into variables
     for Y_index, Y_item in enumerate(current_map):
         for X_index, X_item in enumerate(Y_item):
-            if Y_index == 0:
-                fogmap[Y_index][X_index] = current_map[Y_index][X_index]
-                fogmap[Y_index - 1][X_index] = current_map[Y_index - 1][X_index]
-            elif X_index == 0:
-                fogmap[Y_index][X_index] = current_map[Y_index][X_index]
-                fogmap[Y_index][X_index - 1] = current_map[Y_index][X_index - 1]
-            elif current_map[Y_index][X_index] == P:
+            if FOG == 1:
+                if Y_index == 0 or Y_index == len(current_map) - 1:
+                    mainscreen.addstr(Y_index, X_index,
+                                      X_item)
+                elif X_index == 0 or X_index == len(Y_item) - 1:
+                    mainscreen.addstr(Y_index, X_index,
+                                      X_item)
+            if X_item == P:
                 py = Y_index
                 px = X_index
-            elif current_map[Y_index][X_index] == E:
+                current_map[py][px] = TRAIL
+            elif X_item == E:
                 endy = Y_index
                 endx = X_index
 
-    # draws player mark into fogmap according t player coordinates (py, px)
-    fogmap[py][px] = P
-
     # reweals map around player in revealrange
-    for i in current_map:
-        for i in revealrange:
-            for z in revealrange:
-                fogmap[py + i][px + z] = current_map[py + i][px + z]
+    reveal_aura(REVEAL, mainscreen, current_map, py, px)
+
+    # draws player mark into mainscreen according t player coordinates (py, px)
+    mainscreen.addstr(py, px, P)
 
     # ingame loop
     ingame_loop = True
     # mainscreen.border(0)
+
     while ingame_loop:
-        # draws fogmap on mainscreen
-        drawscreen(fogmap, mainscreen)
         # draws trail mark on player in both map
-        current_map[py][px], fogmap[py][px] = TRAIL, TRAIL
         # waits for and handels input, refreshes main_screen, changes ingame_loop False if you hit "q"
-        py, px, ingame_loop = ingame_input_handler(
-            current_map, fogmap, py, px, revealrange, mainscreen)
-        # draws player mark in both map
-        current_map[py][px], fogmap[py][px] = P, P
+        py, px, ingame_loop, P = ingame_input_handler(
+            current_map, py, px, P, REVEAL, mainscreen)
         # reaveals map around player in revealrange
-        for i in revealrange:
-            for z in revealrange:
-                fogmap[py + i][px + z] = current_map[py + i][px + z]
+        reveal_aura(REVEAL, mainscreen, current_map, py, px)
+        # draws player mark
+        mainscreen.addstr(py, px, P)
         # sets ingame_loop False if you won, else returns ingame_loop unchanged
         ingame_loop = checkwin(win, ingame_loop)
     mainscreen.clear()
