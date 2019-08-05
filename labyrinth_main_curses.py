@@ -155,7 +155,7 @@ curses.noecho()  # limits input for curses only
 curses.cbreak()  # unbufered input mode
 # keypad mode so special buttons will be returned easely
 mainscreen.keypad(1)
-urses.start_color()  # initialize the default color set
+curses.start_color()  # initialize the default color set
 curses.curs_set(0)  # hides cursor
 # main loop
 while True:
