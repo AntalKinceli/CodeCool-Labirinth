@@ -65,7 +65,7 @@ def ingame_input_handler(fullmap, player_y, player_x, player_mark, reveal, mains
     revealrange = range(-reveal, reveal + 1)  # -1, 0, 1 by default
     ingame_loop_continues = True
     while keypressed == -1:
-        keypressed = mainscreen.getch()
+        keypressed = mainscreen.getch()  # refresh screen
     mainscreen.addstr(player_y, player_x, TRAIL)
     if chr(keypressed) == "q":
         ingame_loop_continues = False
@@ -120,11 +120,12 @@ def mainmenu(map_foldername, mainscreen):
     maplist = []
     mapchoose = ""
     exit_key = "q"
-    for file in os.listdir(map_foldername):
+    for file in os.listdir(map_foldername):  # scans for files in "maps"
         if file.endswith(".txt"):
             maplist.append(os.path.join("maps", file))
     maplist.sort()
-    valid_input = [str(index) for index, item in enumerate(maplist)]
+    valid_input = [str(index) for index, item in enumerate(
+        maplist)]  # only reacts to existing maps
     valid_input.append(exit_key)
     mainscreen.addstr(
         "WHICH LEVEL WOULD YOU LIKE TO PLAY?\n\n\nPRESS 0 FOR TUTORIAL\n\n")
@@ -134,13 +135,12 @@ def mainmenu(map_foldername, mainscreen):
     mainscreen.refresh()
     while mapchoose not in valid_input:
         mapchoose = chr(mainscreen.getch())
+    mainscreen.clear()
     if mapchoose == exit_key:
         disable_curses()
         exit()
     else:
-        mapfilename = maplist[int(mapchoose)]
-    mainscreen.clear()
-    return mapfilename
+        return maplist[int(mapchoose)]
 
 
 def reveal_aura(reveal, screen, map, player_y, player_x):
@@ -155,7 +155,7 @@ curses.noecho()  # limits input for curses only
 curses.cbreak()  # unbufered input mode
 # keypad mode so special buttons will be returned easely
 mainscreen.keypad(1)
-curses.start_color()  # initialize the default color set
+urses.start_color()  # initialize the default color set
 curses.curs_set(0)  # hides cursor
 # main loop
 while True:
@@ -181,7 +181,7 @@ while True:
     # searches for player and endpoint marks, and accordingly sets player and endpoint coordinates into variables
     for Y_index, Y_item in enumerate(current_map):
         for X_index, X_item in enumerate(Y_item):
-            if FOG == 1:
+            if FOG == 1:  # reveals boarders if there is fog
                 if Y_index == 0 or Y_index == len(current_map) - 1:
                     mainscreen.addstr(Y_index, X_index,
                                       X_item)
