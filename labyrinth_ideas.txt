@@ -1,0 +1,16 @@
+lore
+maps with custom shapes
+colors
+sound
+pause
+random generated maps
+
+
+error handleing --check
+charter direction display --check
+file names  with scaning --check
+reveal in in line with the player direction --check
+search for player mark and endpoint mark in map --check
+smoother display --check
+smoother movement --check
+support custom shapes --check
