@@ -1,7 +1,34 @@
 Dávid:
-sound
 
 Gábor:
 
 Anti:
-maps
+
+
+Story:
+    A dwarf lying in the forest near to the entrace of a cave. He experiencing the worst hangover in
+history and begging you to help him. He lost all his beer in the forest when he wandered back to the cave
+drank but now need at least three bottles to use the only remedy he hopes can help even is
+this dire situation, the hair of the dog method. He promises his most precious treasure if our hero help him,
+a bottle of aged whiskey what is hidden in the labyrinth inside the cave. When the hero try to convince him 
+just one bottle beer is enough he explains that according to the theory of contextus dependent memory he can 
+only remember the hiding place of the whiskey if he get as drunk again as it was when he burried it.
+    After the hero finds three bottles of beer and brings it back to the dwarf he keeps his promise and
+tells the place of treasure which is the north-west side of the labyrinth in the very corner. After the hero
+finds the place, misses to dig a hole in the very corner but finds a bottle of whiskey anyway. When he finds a 
+bottle in the corner too, he starts to suspect that according to the well documented phenomenon of explicit 
+memory degradation in long term cases of severe alcohol abuse maybe the dwarf hid more when he was blackout drunk.
+    When the hero tries to dig up other places there is whiskey everywhere. So he keeps going inside the maze and wins.
+
+Possible tasks:
+- refactoring in pair programing
+
+- random generated forest map
+    - trees, rocks, pond
+    - loot in forest and labyrinth, revealed and hidden
+    - switching beetwen screens
+- inventory integration
+    - beer, whiskey, spade, random trash from forest
+- story logic
+    - conversations
+    - events
