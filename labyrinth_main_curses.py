@@ -69,6 +69,7 @@ def drawscreen(maplist, mainscreen, border=0):  # prints map without spacing
 # handels movement, reveals in line  returns player coordinates, and boolean
 def ingame_input_handler(fullmap, player_y, player_x, player_mark, reveal, mainscreen):
     keypressed = -1
+    revealoffset = 1
     revealrange = range(-reveal, reveal + 1)  # -1, 0, 1 by default
     ingame_loop_continues = True
     while keypressed == -1:
@@ -80,7 +81,7 @@ def ingame_input_handler(fullmap, player_y, player_x, player_mark, reveal, mains
         if keypressed == curses.KEY_UP and fullmap[player_y - 1][player_x] not in WALL:
             player_y -= 1
             player_mark = "A"
-            while fullmap[player_y - reveal + 1][player_x] not in WALL:
+            while fullmap[player_y - reveal + revealoffset][player_x] not in WALL:
                 for i in revealrange:
                     mainscreen.addstr(player_y - reveal, player_x + i,
                                       fullmap[player_y - reveal][player_x + i])
@@ -88,7 +89,7 @@ def ingame_input_handler(fullmap, player_y, player_x, player_mark, reveal, mains
         elif keypressed == curses.KEY_DOWN and fullmap[player_y + 1][player_x] not in WALL:
             player_y += 1
             player_mark = "V"
-            while fullmap[player_y + reveal - 1][player_x] not in WALL:
+            while fullmap[player_y + reveal - revealoffset][player_x] not in WALL:
                 for i in revealrange:
                     mainscreen.addstr(player_y + reveal, player_x + i,
                                       fullmap[player_y + reveal][player_x + i])
@@ -96,7 +97,7 @@ def ingame_input_handler(fullmap, player_y, player_x, player_mark, reveal, mains
         elif keypressed == curses.KEY_LEFT and fullmap[player_y][player_x - 1] not in WALL:
             player_x -= 1
             player_mark = "<"
-            while fullmap[player_y][player_x - reveal + 1] not in WALL:
+            while fullmap[player_y][player_x - reveal + revealoffset] not in WALL:
                 for i in revealrange:
                     mainscreen.addstr(player_y + i, player_x - reveal,
                                       fullmap[player_y + i][player_x - reveal])
@@ -104,7 +105,7 @@ def ingame_input_handler(fullmap, player_y, player_x, player_mark, reveal, mains
         elif keypressed == curses.KEY_RIGHT and fullmap[player_y][player_x + 1] not in WALL:
             player_x += 1
             player_mark = ">"
-            while fullmap[player_y][player_x + reveal - 1] not in WALL:
+            while fullmap[player_y][player_x + reveal - revealoffset] not in WALL:
                 for i in revealrange:
                     mainscreen.addstr(player_y + i, player_x + reveal,
                                       fullmap[player_y + i][player_x + reveal])
