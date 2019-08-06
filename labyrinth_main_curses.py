@@ -140,7 +140,7 @@ def mainmenu(map_foldername, mainscreen):
     mapchoose = ""
     exit_key = "q"
     try:
-        curses.resizeterm(100, 100)
+        # curses.resizeterm(100, 100)
         for file in os.listdir(map_foldername):  # scans for files in "maps"
             if file.endswith(".txt"):
                 maplist.append(os.path.join("maps", file))
@@ -225,8 +225,8 @@ while True:
         ) = settings
         win = maploader("win_2.txt")[0]
         inventory = {}
-        curses.resizeterm(
-            len(current_map) + 1, len(current_map[0]) + 1)
+        # curses.resizeterm(
+        #     len(current_map) + 1, len(current_map[0]) + 1)
         # creates fog map with the same size as the current_map if enabled
         if FOG == 1:
 
