@@ -52,7 +52,7 @@ def drawscreen(maplist, mainscreen, border=0):  # prints map without spacing
             for item in nlist:
                 mainscreen.addstr(item)
         mainscreen.refresh()
-    except:  # handels crash if terminal is to small
+    except curses.error:  # handels crash if terminal is to small
         disable_curses()
         print("Terminal is to small")
         input("Press Enter to exit")
