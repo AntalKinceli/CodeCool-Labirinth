@@ -3,23 +3,27 @@ import curses
 
 
 def disable_curses():
-    mainscreen.clear  # clears screen
+    mainscreen.erase  # erases screen
     curses.nocbreak()  # disable mode
     mainscreen.keypad(False)  # disable mode
     curses.echo()  # disable mode
     curses.endwin()  # exits curses modes
 
 
-def maploader(filename):  # reads map from filename and returns its values and map lines separately
+# reads map from filename and returns its values and map lines separately
+def maploader(filename, border=1):
     with open(filename) as f:
         file_readout_list = f.read().splitlines()
         maplist = []  # will contain only the map
         VorL_list = []  # will contain only the variables and list/-s
         variablemark = "ß"
         f.close
+        if border > 0:
+            maplist.append(
+                list((" " * len(file_readout_list[-1]) + "\n") * border))
         for line in file_readout_list:
             if line[:1] != variablemark:  # separates map lines and variable/list lines
-                maplist.append(list(line))  # map section
+                maplist.append(list(" " * border + line))  # map section
             else:  # variable/list section
                 # removes variable mark on variable lefts
                 VorL = line.lstrip(line[0])
@@ -67,7 +71,7 @@ def drawscreen(maplist, mainscreen, border=0):  # prints map without spacing
 
 
 # handels movement, reveals in line  returns player coordinates, and boolean
-def ingame_input_handler(fullmap, player_y, player_x, player_mark, reveal, mainscreen):
+def ingame_input_handler(fullmap, player_y, player_x, player_mark, reveal, mainscreen, level_shifter):
     keypressed = -1
     revealoffset = 1
     revealrange = range(-reveal, reveal + 1)  # -1, 0, 1 by default
@@ -77,6 +81,8 @@ def ingame_input_handler(fullmap, player_y, player_x, player_mark, reveal, mains
     mainscreen.addstr(player_y, player_x, TRAIL)
     if chr(keypressed) == "q":
         ingame_loop_continues = False
+        level_shifter = False
+        mainscreen.erase()
     try:
         if keypressed == curses.KEY_UP and fullmap[player_y - 1][player_x] not in WALL:
             player_y -= 1
@@ -110,7 +116,7 @@ def ingame_input_handler(fullmap, player_y, player_x, player_mark, reveal, mains
                     mainscreen.addstr(player_y + i, player_x + reveal,
                                       fullmap[player_y + i][player_x + reveal])
                 reveal += 1
-        return player_y, player_x, ingame_loop_continues, player_mark
+        return player_y, player_x, ingame_loop_continues, player_mark, level_shifter
     except curses.error:
         terminal_error_handler()
 
@@ -119,10 +125,12 @@ def ingame_input_handler(fullmap, player_y, player_x, player_mark, reveal, mains
 def checkwin(winscreen, ingame_loop_continues):
     if py == endy and px == endx:
         ingame_loop_continues = False
-        mainscreen.clear()
+        curses.resizeterm(200, 200)
+        mainscreen.erase()
         drawscreen(win, mainscreen)
         mainscreen.refresh()
         curses.napms(2000)
+
     return ingame_loop_continues
 
 
@@ -132,6 +140,7 @@ def mainmenu(map_foldername, mainscreen):
     mapchoose = ""
     exit_key = "q"
     try:
+        curses.resizeterm(100, 100)
         for file in os.listdir(map_foldername):  # scans for files in "maps"
             if file.endswith(".txt"):
                 maplist.append(os.path.join("maps", file))
@@ -140,19 +149,20 @@ def mainmenu(map_foldername, mainscreen):
             maplist)]  # only reacts to existing maps
         valid_input.append(exit_key)
         mainscreen.addstr(
-            "WHICH LEVEL WOULD YOU LIKE TO PLAY?\n\n\nPRESS 0 FOR TUTORIAL\n\n")
+            "\nWHICH LEVEL WOULD YOU LIKE TO PLAY?\n\n\nPRESS 0 FOR TUTORIAL\n\n"
+        )
         for i in valid_input[1:-1]:  # from the second to the second from last
             mainscreen.addstr("PRESS " + i + " FOR LEVEL " + i + "\n\n")
         mainscreen.addstr("PRESS " + exit_key.upper() + " FOR EXIT")
         mainscreen.refresh()
         while mapchoose not in valid_input:
             mapchoose = chr(mainscreen.getch())
-        mainscreen.clear()
+        mainscreen.erase()
         if mapchoose == exit_key:
             disable_curses()
             exit()
         else:
-            return maplist[int(mapchoose)]
+            return maplist, int(mapchoose)
     except curses.error:
         terminal_error_handler()
 
@@ -164,6 +174,29 @@ def reveal_aura(reveal, screen, map, player_y, player_x):
             mainscreen.addstr(py + i, px + z, current_map[py + i][px + z])
 
 
+def add_to_inventory(inventory, added_items):
+    if type(added_items) == str:
+        if added_items in inventory:
+            inventory[added_items] += 1
+        else:
+            inventory[added_items] = 1
+    else:
+        for k in added_items:
+            if k in inventory:
+                inventory[k] += 1
+            else:
+                inventory[k] = 1
+
+
+def check_stuff_on_map(mainscreen, current_map, mark_list, inventory_dict, player_y, player_x):
+    if current_map[player_y][player_x] in mark_list:
+        add_to_inventory(inventory_dict, mark_list[1 + mark_list.index(
+            current_map[player_y][player_x])])
+        mainscreen.move(0, 7)
+        for k, v in inventory.items():
+            mainscreen.addstr(" " + k + " : " + str(v) + " ")
+
+
 mainscreen = curses.initscr()
 curses.noecho()  # limits input for curses only
 curses.cbreak()  # unbufered input mode
@@ -173,62 +206,74 @@ curses.start_color()  # initialize the default color set
 curses.curs_set(0)  # hides cursor
 # main loop
 while True:
-
     # dislpays maps in "maps" folder on mainscreen and sets your choosen map into current_map variable
-    current_map = mainmenu("maps", mainscreen)
+    maplist, mapchoose = mainmenu("maps", mainscreen)
 
-    # load your file content into lists and variables
-    current_map, settings = maploader(current_map)
-    (P,
-     E,
-     F,
-     WALL,
-     TRAIL,
-     REVEAL,
-     FOG) = settings
-    win = maploader("win_2.txt")[0]
+    level_shifter = True
+    while level_shifter:
+        # load your file content into lists and variablesmaplist[mapchoose]
+        current_map, settings = maploader(maplist[mapchoose])
+        (
+            P,
+            E,
+            F,
+            WALL,
+            TRAIL,
+            REVEAL,
+            FOG,
+            INVENTORY_MARKS
+        ) = settings
+        win = maploader("win_2.txt")[0]
+        inventory = {}
+        curses.resizeterm(
+            len(current_map) + 1, len(current_map[0]) + 1)
+        # creates fog map with the same size as the current_map if enabled
+        if FOG == 1:
 
-    # creates fog map with the same size as the current_map if enabled
-    if FOG == 1:
-        blank_screen(mainscreen, len(current_map[0]), len(current_map), F)
+            blank_screen(mainscreen, len(current_map[0]), len(current_map), F)
+        # searches for player and endpoint marks, and accordingly sets player and endpoint coordinates 0into variables
+        for Y_index, Y_item in enumerate(current_map):
+            for X_index, X_item in enumerate(Y_item):
+                if FOG == 1:  # reveals borders if there is fog
+                    if Y_index == 0 or Y_index == len(current_map) - 1:
+                        mainscreen.addstr(Y_index, X_index,
+                                          X_item)
+                    elif X_index == 0 or X_index == len(Y_item) - 1:
+                        mainscreen.addstr(Y_index, X_index,
+                                          X_item)
+                if X_item == P:
+                    py = Y_index
+                    px = X_index
+                    current_map[py][px] = TRAIL
+                elif X_item == E:
+                    endy = Y_index
+                    endx = X_index
 
-    # searches for player and endpoint marks, and accordingly sets player and endpoint coordinates into variables
-    for Y_index, Y_item in enumerate(current_map):
-        for X_index, X_item in enumerate(Y_item):
-            if FOG == 1:  # reveals boarders if there is fog
-                if Y_index == 0 or Y_index == len(current_map) - 1:
-                    mainscreen.addstr(Y_index, X_index,
-                                      X_item)
-                elif X_index == 0 or X_index == len(Y_item) - 1:
-                    mainscreen.addstr(Y_index, X_index,
-                                      X_item)
-            if X_item == P:
-                py = Y_index
-                px = X_index
-                current_map[py][px] = TRAIL
-            elif X_item == E:
-                endy = Y_index
-                endx = X_index
-
-    # reweals map around player in revealrange
-    reveal_aura(REVEAL, mainscreen, current_map, py, px)
-
-    # draws player mark into mainscreen according t player coordinates (py, px)
-    mainscreen.addstr(py, px, P)
-
-    # ingame loop
-    ingame_loop = True
-    # mainscreen.border(0)
-
-    while ingame_loop:
-        # draws trail mark on player in both map
-        # waits for and handels input, refreshes main_screen, changes ingame_loop False if you hit "q"
-        py, px, ingame_loop, P = ingame_input_handler(
-            current_map, py, px, P, REVEAL, mainscreen)
-        # reaveals map around player in revealrange
+        # reweals map around player in revealrange
         reveal_aura(REVEAL, mainscreen, current_map, py, px)
-        # draws player mark
+
+        # draws player mark into mainscreen according t player coordinates (py, px)
         mainscreen.addstr(py, px, P)
-        # sets ingame_loop False if you won, else returns ingame_loop unchanged
-        ingame_loop = checkwin(win, ingame_loop)
-    mainscreen.clear()
+
+        # ingame loop
+        ingame_loop = True
+        # mainscreen.border(0)
+
+        while ingame_loop:
+            # draws trail mark on player in both map
+            # waits for and handels input, refreshes main_screen, changes ingame_loop False if you hit "q"
+            py, px, ingame_loop, P, level_shifter = ingame_input_handler(
+                current_map, py, px, P, REVEAL, mainscreen, level_shifter)
+            # reaveals map around player in revealrange
+            reveal_aura(REVEAL, mainscreen, current_map, py, px)
+            # draws player mark
+            check_stuff_on_map(mainscreen, current_map,
+                               INVENTORY_MARKS, inventory, py, px)
+            mainscreen.addstr(py, px, P)
+            # sets ingame_loop False if you won, else returns ingame_loop unchanged
+            ingame_loop = checkwin(win, ingame_loop)
+        mainscreen.erase()
+        if maplist[mapchoose] != maplist[-1]:
+            mapchoose += 1
+        else:
+            level_shifter = False

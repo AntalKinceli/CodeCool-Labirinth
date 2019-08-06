@@ -1,4 +1,5 @@
 lore
+dialog windows
 maps with custom shapes
 colors
 sound
@@ -6,6 +7,9 @@ pause
 random generated maps
 
 
+
+game inventory --check
+border --check
 error handleing --check
 charter direction display --check
 file names  with scaning --check
