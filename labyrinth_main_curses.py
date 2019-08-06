@@ -39,10 +39,20 @@ def maploader(filename):  # reads map from filename and returns its values and m
 
 # generates x width, y heigth list with full of g
 def blank_screen(screen, width, heigth, blankmark, border=0):
-    for index in range(heigth):
-        mainscreen.move(index + border, border)
-        for z in range(width):
-            mainscreen.addstr(blankmark)
+    try:
+        for index in range(heigth):
+            mainscreen.move(index + border, border)
+            for z in range(width):
+                mainscreen.addstr(blankmark)
+    except curses.error:
+        terminal_error_handler()
+
+
+def terminal_error_handler():
+    disable_curses()
+    print("Terminal is to small")
+    input("Press Enter to exit")
+    exit()
 
 
 def drawscreen(maplist, mainscreen, border=0):  # prints map without spacing
@@ -53,10 +63,7 @@ def drawscreen(maplist, mainscreen, border=0):  # prints map without spacing
                 mainscreen.addstr(item)
         mainscreen.refresh()
     except curses.error:  # handels crash if terminal is to small
-        disable_curses()
-        print("Terminal is to small")
-        input("Press Enter to exit")
-        exit()
+        terminal_error_handler()
 
 
 # handels movement, reveals in line  returns player coordinates, and boolean
@@ -69,39 +76,42 @@ def ingame_input_handler(fullmap, player_y, player_x, player_mark, reveal, mains
     mainscreen.addstr(player_y, player_x, TRAIL)
     if chr(keypressed) == "q":
         ingame_loop_continues = False
-    elif keypressed == curses.KEY_UP and fullmap[player_y - 1][player_x] not in WALL:
-        player_y -= 1
-        player_mark = "A"
-        while fullmap[player_y - reveal + 1][player_x] not in WALL:
-            for i in revealrange:
-                mainscreen.addstr(player_y - reveal, player_x + i,
-                                  fullmap[player_y - reveal][player_x + i])
-            reveal += 1
-    elif keypressed == curses.KEY_DOWN and fullmap[player_y + 1][player_x] not in WALL:
-        player_y += 1
-        player_mark = "V"
-        while fullmap[player_y + reveal - 1][player_x] not in WALL:
-            for i in revealrange:
-                mainscreen.addstr(player_y + reveal, player_x + i,
-                                  fullmap[player_y + reveal][player_x + i])
-            reveal += 1
-    elif keypressed == curses.KEY_LEFT and fullmap[player_y][player_x - 1] not in WALL:
-        player_x -= 1
-        player_mark = "<"
-        while fullmap[player_y][player_x - reveal + 1] not in WALL:
-            for i in revealrange:
-                mainscreen.addstr(player_y + i, player_x - reveal,
-                                  fullmap[player_y + i][player_x - reveal])
-            reveal += 1
-    elif keypressed == curses.KEY_RIGHT and fullmap[player_y][player_x + 1] not in WALL:
-        player_x += 1
-        player_mark = ">"
-        while fullmap[player_y][player_x + reveal - 1] not in WALL:
-            for i in revealrange:
-                mainscreen.addstr(player_y + i, player_x + reveal,
-                                  fullmap[player_y + i][player_x + reveal])
-            reveal += 1
-    return player_y, player_x, ingame_loop_continues, player_mark
+    try:
+        if keypressed == curses.KEY_UP and fullmap[player_y - 1][player_x] not in WALL:
+            player_y -= 1
+            player_mark = "A"
+            while fullmap[player_y - reveal + 1][player_x] not in WALL:
+                for i in revealrange:
+                    mainscreen.addstr(player_y - reveal, player_x + i,
+                                      fullmap[player_y - reveal][player_x + i])
+                reveal += 1
+        elif keypressed == curses.KEY_DOWN and fullmap[player_y + 1][player_x] not in WALL:
+            player_y += 1
+            player_mark = "V"
+            while fullmap[player_y + reveal - 1][player_x] not in WALL:
+                for i in revealrange:
+                    mainscreen.addstr(player_y + reveal, player_x + i,
+                                      fullmap[player_y + reveal][player_x + i])
+                reveal += 1
+        elif keypressed == curses.KEY_LEFT and fullmap[player_y][player_x - 1] not in WALL:
+            player_x -= 1
+            player_mark = "<"
+            while fullmap[player_y][player_x - reveal + 1] not in WALL:
+                for i in revealrange:
+                    mainscreen.addstr(player_y + i, player_x - reveal,
+                                      fullmap[player_y + i][player_x - reveal])
+                reveal += 1
+        elif keypressed == curses.KEY_RIGHT and fullmap[player_y][player_x + 1] not in WALL:
+            player_x += 1
+            player_mark = ">"
+            while fullmap[player_y][player_x + reveal - 1] not in WALL:
+                for i in revealrange:
+                    mainscreen.addstr(player_y + i, player_x + reveal,
+                                      fullmap[player_y + i][player_x + reveal])
+                reveal += 1
+        return player_y, player_x, ingame_loop_continues, player_mark
+    except curses.error:
+        terminal_error_handler()
 
 
 # prints win screen and returns False if win condition is true
@@ -120,27 +130,30 @@ def mainmenu(map_foldername, mainscreen):
     maplist = []
     mapchoose = ""
     exit_key = "q"
-    for file in os.listdir(map_foldername):  # scans for files in "maps"
-        if file.endswith(".txt"):
-            maplist.append(os.path.join("maps", file))
-    maplist.sort()
-    valid_input = [str(index) for index, item in enumerate(
-        maplist)]  # only reacts to existing maps
-    valid_input.append(exit_key)
-    mainscreen.addstr(
-        "WHICH LEVEL WOULD YOU LIKE TO PLAY?\n\n\nPRESS 0 FOR TUTORIAL\n\n")
-    for i in valid_input[1:-1]:  # from the second to the second from last
-        mainscreen.addstr("PRESS " + i + " FOR LEVEL " + i + "\n\n")
-    mainscreen.addstr("PRESS " + exit_key.upper() + " FOR EXIT")
-    mainscreen.refresh()
-    while mapchoose not in valid_input:
-        mapchoose = chr(mainscreen.getch())
-    mainscreen.clear()
-    if mapchoose == exit_key:
-        disable_curses()
-        exit()
-    else:
-        return maplist[int(mapchoose)]
+    try:
+        for file in os.listdir(map_foldername):  # scans for files in "maps"
+            if file.endswith(".txt"):
+                maplist.append(os.path.join("maps", file))
+        maplist.sort()
+        valid_input = [str(index) for index, item in enumerate(
+            maplist)]  # only reacts to existing maps
+        valid_input.append(exit_key)
+        mainscreen.addstr(
+            "WHICH LEVEL WOULD YOU LIKE TO PLAY?\n\n\nPRESS 0 FOR TUTORIAL\n\n")
+        for i in valid_input[1:-1]:  # from the second to the second from last
+            mainscreen.addstr("PRESS " + i + " FOR LEVEL " + i + "\n\n")
+        mainscreen.addstr("PRESS " + exit_key.upper() + " FOR EXIT")
+        mainscreen.refresh()
+        while mapchoose not in valid_input:
+            mapchoose = chr(mainscreen.getch())
+        mainscreen.clear()
+        if mapchoose == exit_key:
+            disable_curses()
+            exit()
+        else:
+            return maplist[int(mapchoose)]
+    except curses.error:
+        terminal_error_handler()
 
 
 def reveal_aura(reveal, screen, map, player_y, player_x):
