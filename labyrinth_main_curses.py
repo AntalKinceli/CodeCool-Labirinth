@@ -74,41 +74,63 @@ def ingame_input_handler(fullmap, player_y, player_x, player_mark, reveal, mains
     while keypressed == -1:
         keypressed = mainscreen.getch()  # refresh screen
     mainscreen.addstr(player_y, player_x, TRAIL)
-    if chr(keypressed) == "q":
+    if keypressed == 113:  # "q button"
         ingame_loop_continues = False
+
+    # UP, DOWN, LEFT, RIGHT = 0, 1, 2, 3 just description of directions
+    # d as direction
+    if keypressed == curses.KEY_UP:
+        DY, DX = -1, 0
+        player_mark = "A"
+    elif keypressed == curses.KEY_DOWN:
+        DY, DX = 1, 0
+        player_mark = "V"
+    elif keypressed == curses.KEY_LEFT:
+        DY, DX = 0, -1
+        player_mark = "<"
+    elif keypressed == curses.KEY_RIGHT:
+        DY, DX = 0, 1
+        player_mark = ">"
+    elif keypressed == 113:  # button
+        DY, DX = 0, 0
     try:
-        if keypressed == curses.KEY_UP and fullmap[player_y - 1][player_x] not in WALL:
-            player_y -= 1
-            player_mark = "A"
-            while fullmap[player_y - reveal + 1][player_x] not in WALL:
+        if fullmap[player_y + DY][player_x + DX] not in WALL:
+            player_y += DY
+            player_x += DX
+            while fullmap[player_y + DY * (reveal - 1)][player_x + DX * (reveal - 1)] not in WALL:
                 for i in revealrange:
-                    mainscreen.addstr(player_y - reveal, player_x + i,
-                                      fullmap[player_y - reveal][player_x + i])
+                    mainscreen.addstr(
+                        player_y + DY*reveal + abs(DX)*i,
+                        player_x + DX * reveal + abs(DY) * i,
+                        fullmap[player_y + DY*reveal + abs(DX) * i]
+                        [player_x + DX*reveal + abs(DY)*i]
+                    )
                 reveal += 1
-        elif keypressed == curses.KEY_DOWN and fullmap[player_y + 1][player_x] not in WALL:
-            player_y += 1
-            player_mark = "V"
-            while fullmap[player_y + reveal - 1][player_x] not in WALL:
-                for i in revealrange:
-                    mainscreen.addstr(player_y + reveal, player_x + i,
-                                      fullmap[player_y + reveal][player_x + i])
-                reveal += 1
-        elif keypressed == curses.KEY_LEFT and fullmap[player_y][player_x - 1] not in WALL:
-            player_x -= 1
-            player_mark = "<"
-            while fullmap[player_y][player_x - reveal + 1] not in WALL:
-                for i in revealrange:
-                    mainscreen.addstr(player_y + i, player_x - reveal,
-                                      fullmap[player_y + i][player_x - reveal])
-                reveal += 1
-        elif keypressed == curses.KEY_RIGHT and fullmap[player_y][player_x + 1] not in WALL:
-            player_x += 1
-            player_mark = ">"
-            while fullmap[player_y][player_x + reveal - 1] not in WALL:
-                for i in revealrange:
-                    mainscreen.addstr(player_y + i, player_x + reveal,
-                                      fullmap[player_y + i][player_x + reveal])
-                reveal += 1
+
+        # elif keypressed == curses.KEY_DOWN and fullmap[player_y + 1][player_x] not in WALL:
+        #     player_y += 1
+        #     player_mark = "V"
+        #     while fullmap[player_y + reveal - 1][player_x] not in WALL:
+        #         for i in revealrange:
+        #             mainscreen.addstr(player_y + reveal, player_x + i,
+        #                               fullmap[player_y + reveal][player_x + i])
+        #         reveal += 1
+        # elif keypressed == curses.KEY_LEFT and fullmap[player_y][player_x - 1] not in WALL:
+        #     player_x -= 1
+        #     player_mark = "<"
+        #     while fullmap[player_y][player_x - reveal + 1] not in WALL:
+        #         for i in revealrange:
+        #             mainscreen.addstr(player_y + i, player_x - reveal,
+        #                               fullmap[player_y + i][player_x - reveal])
+        #         reveal += 1
+        # elif keypressed == curses.KEY_RIGHT and fullmap[player_y][player_x + 1] not in WALL:
+        #     player_x += 1
+        #     player_mark = ">"
+        #     while fullmap[player_y][player_x + reveal - 1] not in WALL:
+        #         for i in revealrange:
+        #             mainscreen.addstr(player_y + i, player_x + reveal,
+        #                               fullmap[player_y + i][player_x + reveal])
+        #         reveal += 1
         return player_y, player_x, ingame_loop_continues, player_mark
     except curses.error:
         terminal_error_handler()
