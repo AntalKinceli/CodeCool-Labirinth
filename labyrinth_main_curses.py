@@ -81,10 +81,10 @@ def ingame_input_handler(fullmap, player_y, player_x, player_mark, reveal, mains
     mainscreen.addstr(player_y, player_x, TRAIL)
     if keypressed == 113:  # "q button"
         ingame_loop_continues = False
+        level_shifter = False
 
     # UP, DOWN, LEFT, RIGHT = 0, 1, 2, 3 just description of directions
     # d as direction
-    level_shifter = False
     if keypressed == curses.KEY_UP:
         DY, DX = -1, 0
         player_mark = "A"
@@ -97,8 +97,8 @@ def ingame_input_handler(fullmap, player_y, player_x, player_mark, reveal, mains
     elif keypressed == curses.KEY_RIGHT:
         DY, DX = 0, 1
         player_mark = ">"
-    elif keypressed == 113:  # button
-        DY, DX = 0, 0
+    elif keypressed == 113:  # 'q' button    # mainscreen.erase() not sure if it needed
+        DY, DX = 1, 1  # any number good just 0,0 is bad / infinite loop
     try:
         if fullmap[player_y + DY][player_x + DX] not in WALL:
             player_y += DY
@@ -117,12 +117,14 @@ def ingame_input_handler(fullmap, player_y, player_x, player_mark, reveal, mains
         terminal_error_handler()
 
 
-# prints win screen and returns False if win condition is true
-def checkwin(winscreen, ingame_loop_continues):
+# prints win screen and returns Fal    # mainscreen.erase() not sure if it needed condition is true
+def checkwin(winscreen, ingame_loop    # mainscreen.erase() not sure if it neededs):
     if py == endy and px == endx:
-        ingame_loop_continues = False
+        ingame_loop_continues = Fal    # mainscreen.erase() not sure if it needed
+        # mainscreen.erase() not sure if it needed
         curses.resizeterm(200, 200)
         mainscreen.erase()
+        # mainscreen.erase() not sure if it needed
         drawscreen(win, mainscreen)
         mainscreen.refresh()
         curses.napms(2000)
@@ -130,8 +132,8 @@ def checkwin(winscreen, ingame_loop_continues):
     return ingame_loop_continues
 
 
-# dislpays maps in map_foldername and returns the chosen map filename, breaks the main loop if you hit "q"
-def mainmenu(map_foldername, mainscreen):
+# dislpays maps in map_foldername and ret    # mainscreen.erase() not sure if it needed the chosen map filename, breaks the main loop if you hit "q"
+def mainmenu(map_foldername, mainscreen):    # mainscreen.erase() not sure if it needed
     maplist = []
     mapchoose = ""
     exit_key = "q"
@@ -203,12 +205,12 @@ curses.curs_set(0)  # hides cursor
 # main loop
 while True:
     # dislpays maps in "maps" folder on mainscreen and sets your choosen map into current_map variable
-    maplist, mapchoose = mainmenu("maps", mainscreen)
+    maplist, mapchoose=mainmenu("maps", mainscreen)
 
-    level_shifter = True
+    level_shifter=True
     while level_shifter:
         # load your file content into lists and variablesmaplist[mapchoose]
-        current_map, settings = maploader(maplist[mapchoose])
+        current_map, settings=maploader(maplist[mapchoose])
         (
             P,
             E,
@@ -218,9 +220,9 @@ while True:
             REVEAL,
             FOG,
             INVENTORY_MARKS
-        ) = settings
-        win = maploader("win_2.txt")[0]
-        inventory = {}
+        )=settings
+        win=maploader("win_2.txt")[0]
+        inventory={}
         # curses.resizeterm(
         #     len(current_map) + 1, len(current_map[0]) + 1)
         # creates fog map with the same size as the current_map if enabled
@@ -258,7 +260,7 @@ while True:
         while ingame_loop:
             # draws trail mark on player in both map
             # waits for and handels input, refreshes main_screen, changes ingame_loop False if you hit "q"
-            py, px, ingame_loop, P, level_shifter = ingame_input_handler(
+            py, px, ingame_loop, P, level_shifter=ingame_input_handler(
                 current_map, py, px, P, REVEAL, mainscreen, level_shifter)
             # reaveals map around player in revealrange
             reveal_aura(REVEAL, mainscreen, current_map, py, px)
@@ -267,7 +269,7 @@ while True:
                                INVENTORY_MARKS, inventory, py, px)
             mainscreen.addstr(py, px, P)
             # sets ingame_loop False if you won, else returns ingame_loop unchanged
-            ingame_loop = checkwin(win, ingame_loop)
+            ingame_loop=checkwin(win, ingame_loop)
         mainscreen.erase()
         if maplist[mapchoose] != maplist[-1]:
             mapchoose += 1
