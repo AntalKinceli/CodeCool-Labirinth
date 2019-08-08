@@ -83,8 +83,6 @@ def ingame_input_handler(fullmap, player_y, player_x, player_mark, reveal, mains
         ingame_loop_continues = False
         level_shifter = False
 
-    # UP, DOWN, LEFT, RIGHT = 0, 1, 2, 3 just description of directions
-    # d as direction
     if keypressed == curses.KEY_UP:
         DY, DX = -1, 0
         player_mark = "A"
