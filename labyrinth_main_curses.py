@@ -72,11 +72,12 @@ def drawscreen(maplist, mainscreen, border=0):  # prints map without spacing
 
 # handels movement, reveals in line  returns player coordinates, and boolean
 def ingame_input_handler(fullmap, player_y, player_x, player_mark, reveal, mainscreen, level_shifter):
-    keypressed = -1
+    keypressed = 410  # iddle value
     # revealoffset = 1 / not used anymore
     revealrange = range(-reveal, reveal + 1)  # -1, 0, 1 by default
     ingame_loop_continues = True
-    while keypressed == -1:
+    # 113 is "q" ASCII value
+    while keypressed not in [curses.KEY_UP, curses.KEY_DOWN, curses.KEY_LEFT, curses.KEY_RIGHT, 113]:
         keypressed = mainscreen.getch()  # refresh screen
     mainscreen.addstr(player_y, player_x, TRAIL)
     if keypressed == 113:  # "q button"
@@ -100,7 +101,7 @@ def ingame_input_handler(fullmap, player_y, player_x, player_mark, reveal, mains
     elif keypressed == 113:  # 'q' button
         DY, DX = 1, 1   # can't be 0, 0
     try:
-        if fullmap[player_y + DY][player_x + DX] not in WALL and level_shifter is True:
+        if fullmap[player_y + DY][player_x + DX] not in WALL and ingame_loop_continues is True:
             player_y += DY
             player_x += DX
             while fullmap[player_y + DY * (reveal - 1)][player_x + DX * (reveal - 1)] not in WALL:
@@ -259,7 +260,8 @@ while True:
             # draws trail mark on player in both map
             # waits for and handels input, refreshes main_screen, changes ingame_loop False if you hit "q"
             py, px, ingame_loop, P, level_shifter = ingame_input_handler(
-                current_map, py, px, P, REVEAL, mainscreen, level_shifter)
+                current_map, py, px, P, REVEAL, mainscreen, level_shifter
+            )
             # reaveals map around player in revealrange
             reveal_aura(REVEAL, mainscreen, current_map, py, px)
             # draws player mark
