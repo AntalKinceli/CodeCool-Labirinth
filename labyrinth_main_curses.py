@@ -183,13 +183,14 @@ def add_to_inventory(inventory, added_items):
                 inventory[k] = 1
 
 
-def check_stuff_on_map(mainscreen, current_map, mark_list, inventory_dict, player_y, player_x):
+def check_stuff_on_map(mainscreen, current_map, mark_list, inventory_dict, player_y, player_x, trailmark):
     if current_map[player_y][player_x] in mark_list:
         add_to_inventory(inventory_dict, mark_list[1 + mark_list.index(
             current_map[player_y][player_x])])
         mainscreen.move(0, 7)
         for k, v in inventory.items():
             mainscreen.addstr(" " + k + " : " + str(v) + " ")
+        current_map[player_y][player_x] = trailmark
 
 
 mainscreen = curses.initscr()
@@ -264,7 +265,7 @@ while True:
             reveal_aura(REVEAL, mainscreen, current_map, py, px)
             # draws player mark
             check_stuff_on_map(mainscreen, current_map,
-                               INVENTORY_MARKS, inventory, py, px)
+                               INVENTORY_MARKS, inventory, py, px, TRAIL)
             mainscreen.addstr(py, px, P)
             # sets ingame_loop False if you won, else returns ingame_loop unchanged
             ingame_loop = checkwin(win, ingame_loop)
